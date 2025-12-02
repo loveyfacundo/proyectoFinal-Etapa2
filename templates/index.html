@@ -1,0 +1,215 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TodoDeporte</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body>
+    <header>
+      <div class="header-bar">
+        <h1 class="header-title">TodoDeporte</h1>
+        <nav class="nav" aria-label="Principal">
+          <ul class="nav-links">
+            <li class="nav-link">
+              <a href="{% url 'index' %}">Inicio</a>
+            </li>
+            <li class="nav-link dropdown">
+              <button
+                class="dropdown-toggle"
+                type="button"
+                aria-haspopup="true"
+                aria-expanded="false"
+              >
+                Deportes
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#chevron-down"></use>
+                </svg>
+              </button>
+              <ul class="dropdown-menu" aria-label="Categorías">
+                <li><a href="#">Fútbol</a></li>
+                <li><a href="#">F1</a></li>
+                <li><a href="#">Vóley</a></li>
+                <li><a href="#">Básquet</a></li>
+                <li><a href="#">Tenis</a></li>
+              </ul>
+            </li>
+            <li class="nav-link">
+              <a href="{% url 'about' %}">Acerca de</a>
+            </li>
+            <li class="nav-link">
+              <a href="{% url 'contact' %}">Contacto</a>
+            </li>
+          </ul>
+        </nav>
+        <div class="profile-menu">
+          <button
+            class="theme-toggle"
+            aria-label="Cambiar tema"
+            title="Cambiar tema"
+          >
+            <svg class="icon icon-md theme-icon" aria-hidden="true">
+              <use href="{% static 'img/icons.svg' %}#sun"></use>
+            </svg>
+          </button>
+          <button
+            class="profile-toggle"
+            aria-label="Menú de usuario"
+            aria-haspopup="true"
+            aria-expanded="false"
+          >
+            <div class="profile-avatar">
+              <svg class="icon icon-md" aria-hidden="true">
+                <use href="{% static 'img/icons.svg' %}#user"></use>
+              </svg>
+            </div>
+          </button>
+          <div class="profile-dropdown" aria-label="Opciones de usuario">
+            <!-- Menú de invitado -->
+            <div class="profile-menu-guest">
+              <a href="#" class="profile-item">
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#user"></use>
+                </svg>
+                <span>Registrarse</span>
+              </a>
+              <a href="#" class="profile-item">
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#login"></use>
+                </svg>
+                <span>Iniciar Sesión</span>
+              </a>
+            </div>
+            <!-- Menú de usuario conectado (oculto por defecto) -->
+            <div class="profile-menu-logged" style="display: none">
+              <a href="#" class="profile-item">
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#user"></use>
+                </svg>
+                <span>Mi Perfil</span>
+              </a>
+              <a href="#" class="profile-item profile-item-logout">
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#logout"></use>
+                </svg>
+                <span>Cerrar Sesión</span>
+              </a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <!-- Carrusel / Noticias Destacadas -->
+      <section class="carrusel" aria-label="Noticias destacadas">
+        <div class="carrusel-track">
+          <button class="carrusel-nav carrusel-prev" aria-label="Anterior">
+            <svg class="icon icon-md" aria-hidden="true">
+              <use href="{% static 'img/icons.svg' %}#chevron-left"></use>
+            </svg>
+          </button>
+          <div class="carrusel-slide active">
+            <img src="{% static 'img/hero-1.svg' %}" alt="Destacado 1" />
+          </div>
+          <div class="carrusel-slide">
+            <img src="{% static 'img/hero-2.svg' %}" alt="Destacado 2" />
+          </div>
+          <div class="carrusel-slide">
+            <img src="{% static 'img/hero-3.svg' %}" alt="Destacado 3" />
+          </div>
+          <button class="carrusel-nav carrusel-next" aria-label="Siguiente">
+            <svg class="icon icon-md" aria-hidden="true">
+              <use href="{% static 'img/icons.svg' %}#chevron-right"></use>
+            </svg>
+          </button>
+          <!-- Puntos del carrusel -->
+          <div class="carrusel-dots" aria-hidden="true">
+            <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Últimas Noticias -->
+      <section class="home-grid">
+        <div class="home-column">
+          <h2>Últimas Noticias</h2>
+          <ul class="news-list">
+            <li class="news-item">
+              <div class="news-thumb"></div>
+              <div class="news-meta">
+                <a href="#" class="news-title">Argentina Campeón del Mundo</a>
+                <div class="news-info">Categoría: 18/12/2022</div>
+              </div>
+            </li>
+            <li class="news-item">
+              <div class="news-thumb"></div>
+              <div class="news-meta">
+                <a href="#" class="news-title"
+                  >En VIVO: Sorteo de la fase de grupos del Mundial 2026</a
+                >
+                <div class="news-info">Categoría: 05/12/2025</div>
+              </div>
+            </li>
+            <li class="news-item">
+              <div class="news-thumb"></div>
+              <div class="news-meta">
+                <a href="#" class="news-title"
+                  >Todo o Nada en la última fecha: Verstappen vs Norris vs
+                  Piastri</a
+                >
+                <div class="news-info">Categoría: 07/12/2025</div>
+              </div>
+            </li>
+          </ul>
+        </div>
+
+        <!-- Categorías Populares -->
+        <aside class="home-column">
+          <h2>Categorías Populares</h2>
+          <ul class="category-list">
+            <li><a href="#">Fútbol</a></li>
+            <li><a href="#">F1</a></li>
+            <li><a href="#">Basquet</a></li>
+            <li><a href="#">Tenis</a></li>
+            <li><a href="#">Other Sports</a></li>
+          </ul>
+          <div class="category-promo"></div>
+        </aside>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-grid">
+        <div>
+          <h3>Footer</h3>
+          <ul>
+            <li><a href="#">Facebook</a></li>
+            <li><a href="#">Sitemap</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Social</h3>
+          <ul>
+            <li><a href="#">Links</a></li>
+            <li><a href="#">Twitter</a></li>
+          </ul>
+        </div>
+        <div>
+          <h3>Newsletter</h3>
+          <form class="newsletter" action="#" method="post">
+            <input type="email" placeholder="Email" aria-label="Email" />
+            <button type="submit">Enviar</button>
+          </form>
+        </div>
+      </div>
+      <p class="footer-copy">&copy; 2025 TodoDeporte</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+  </body>
+</html>
