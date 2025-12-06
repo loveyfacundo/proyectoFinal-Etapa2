@@ -56,6 +56,12 @@
                         <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-weight: bold;">
                             Hola, {{ user.username }}
                         </div>
+
+                        {% if user.is_superuser or user.perfil.rol == 'colaborador' %}
+                            <a href="{% url 'crear_articulo' %}" class="profile-item">
+                                <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#plus"></use></svg> <span>Crear Artículo</span>
+                            </a>
+                        {% endif %}
                         
                         <a href="#" class="profile-item">
                             <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>

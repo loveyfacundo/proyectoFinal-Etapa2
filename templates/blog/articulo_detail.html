@@ -12,6 +12,14 @@
             {{ articulo.categoria.nombre }}
         </span>
         <h1 style="margin-top: 10px; font-size: 2.5rem; color: var(--title-color);">{{ articulo.titulo }}</h1>
+
+        {% if user.is_superuser or user.perfil.rol == 'colaborador' %}
+            <div style="margin-top: 10px;">
+                <a href="{% url 'editar_articulo' articulo.id %}" style="margin-right: 15px; color: var(--link-color); font-weight: bold;">Editar Artículo</a>
+                <a href="{% url 'eliminar_articulo' articulo.id %}" style="color: #dc3545; font-weight: bold;">Eliminar Artículo</a>
+            </div>
+        {% endif %}
+
         <div class="meta" style="color: var(--footer-text); margin-top: 10px;">
             Por <strong>{{ articulo.autor.first_name|default:articulo.autor.username }}</strong> 
             | {{ articulo.fecha_creacion|date:"d de F de Y" }}

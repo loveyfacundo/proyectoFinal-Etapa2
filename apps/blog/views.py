@@ -5,9 +5,10 @@ from django.shortcuts import (
 )
 
 from django.contrib.auth import login
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, user_passes_test
 
 from apps.blog.forms import (
+    ArticuloForm,
     RegistroForm,
     ComentarioForm
 )
@@ -119,3 +120,48 @@ def eliminar_comentario(request, id):
     
     return render(request, 'blog/comentario_confirm_delete.html', {'comentario': comentario})
 
+# --- FUNCIONES DE SEGURIDAD ---
+def es_colaborador(user):
+    # Verifica si es superusuario O si tiene el rol de colaborador en su perfil
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.rol == 'colaborador'))
+
+# --- VISTAS CRUD ARTÍCULOS ---
+
+@user_passes_test(es_colaborador) # Solo entra si pasa la prueba
+def crear_articulo(request):
+    if request.method == 'POST':
+        # Importante: request.FILES es necesario para subir imágenes
+        form = ArticuloForm(request.POST, request.FILES)
+        if form.is_valid():
+            articulo = form.save(commit=False)
+            articulo.autor = request.user # Asignamos el autor automáticamente
+            articulo.save()
+            return redirect('detalle_articulo', id=articulo.id)
+    else:
+        form = ArticuloForm()
+    
+    return render(request, 'blog/articulo_form.html', {'form': form, 'titulo': 'Crear Nuevo Artículo'})
+
+@user_passes_test(es_colaborador)
+def editar_articulo(request, id):
+    articulo = get_object_or_404(Articulo, id=id)
+    
+    if request.method == 'POST':
+        form = ArticuloForm(request.POST, request.FILES, instance=articulo)
+        if form.is_valid():
+            form.save()
+            return redirect('detalle_articulo', id=articulo.id)
+    else:
+        form = ArticuloForm(instance=articulo)
+    
+    return render(request, 'blog/articulo_form.html', {'form': form, 'titulo': 'Editar Artículo'})
+
+@user_passes_test(es_colaborador)
+def eliminar_articulo(request, id):
+    articulo = get_object_or_404(Articulo, id=id)
+    
+    if request.method == 'POST':
+        articulo.delete()
+        return redirect('index')
+    
+    return render(request, 'blog/articulo_confirm_delete.html', {'articulo': articulo})

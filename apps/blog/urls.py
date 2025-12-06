@@ -14,6 +14,11 @@ urlpatterns = [
     path('comentario/editar/<int:id>/', views.editar_comentario, name='editar_comentario'),
     path('comentario/eliminar/<int:id>/', views.eliminar_comentario, name='eliminar_comentario'),
 
+    # GESTIÓN DE ARTÍCULOS (Solo Colaboradores)
+    path('crear/', views.crear_articulo, name='crear_articulo'),
+    path('editar/<int:id>/', views.editar_articulo, name='editar_articulo'),
+    path('eliminar/<int:id>/', views.eliminar_articulo, name='eliminar_articulo'),
+
     # RUTAS DE AUTENTICACIÓN
     path('registro/', views.registro, name='registro'),
     
