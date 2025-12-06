@@ -1,37 +1,227 @@
 {% extends 'base.html' %}
+{% load static %}
 
 {% block title %}{{ titulo }} - TodoDeporte{% endblock %}
 
 {% block content %}
-<section style="max-width: 800px; margin: 2rem auto; padding: 2rem; background: var(--card-bg); border-radius: 8px;">
-    <h2 style="margin-bottom: 1.5rem;">{{ titulo }}</h2>
+
+<section class="form-card">
+    <div class="form-header">
+        <h2>{{ titulo }}</h2>
+    </div>
     
     <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
         
         {% for field in form %}
-            <div style="margin-bottom: 1rem;">
-                <label style="display:block; font-weight:bold; margin-bottom:5px;">{{ field.label }}</label>
+            <div class="form-group">
                 
-                <div style="width: 100%;">
+                {# Caso especial para Checkbox (Destacado) #}
+                {% if field.name == 'destacado' %}
+                    <label class="checkbox-container">
+                        {{ field }}
+                        <span class="checkbox-label-text">{{ field.label }}</span>
+                    </label>
+                    {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
+
+                {# Caso especial para Imagen (Preview o etiqueta especial) #}
+                {% elif field.name == 'imagen_destacada' %}
+                    <label class="form-label">{{ field.label }}</label>
                     {{ field }}
-                </div>
-                
-                {% if field.help_text %}
-                    <small style="color: grey;">{{ field.help_text }}</small>
+                    {% if field.value %}
+                        <div style="margin-top: 10px; font-size: 0.9rem; color: var(--header-bg);">
+                            Imagen actual: {{ field.value.url }}
+                        </div>
+                    {% endif %}
+
+                {# Campos normales (Título, Categoría, Contenido) #}
+                {% else %}
+                    <label class="form-label" for="{{ field.id_for_label }}">
+                        {{ field.label }}
+                    </label>
+                    
+                    {{ field }} {% if field.help_text %}
+                        <small class="help-text">{{ field.help_text }}</small>
+                    {% endif %}
                 {% endif %}
+
+                {# Errores del campo #}
                 {% if field.errors %}
-                    <div style="color: red;">{{ field.errors }}</div>
+                    <ul class="error-list">
+                        {% for error in field.errors %}
+                            <li>• {{ error }}</li>
+                        {% endfor %}
+                    </ul>
                 {% endif %}
             </div>
         {% endfor %}
         
-        <div style="margin-top: 2rem;">
-            <button type="submit" style="padding: 10px 20px; background: var(--header-bg); color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 1rem;">
-                Guardar Artículo
+        <div class="form-actions">
+            <button type="submit" class="btn-save">
+                Guardar Cambios
             </button>
-            <a href="{% url 'index' %}" style="margin-left: 10px; color: var(--text-color);">Cancelar</a>
+            <a href="{% url 'index' %}" class="btn-cancel">Cancelar</a>
         </div>
     </form>
 </section>
+
+<style>
+    .form-card {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2.5rem;
+        background: var(--card-bg);
+        border-radius: 12px;
+        box-shadow: 0 4px 12px var(--card-shadow);
+    }
+    
+    .form-header {
+        margin-bottom: 2rem;
+        padding-bottom: 1rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+    
+    .form-header h2 {
+        color: var(--title-color);
+        font-size: 1.8rem;
+    }
+
+    .form-group {
+        margin-bottom: 1.5rem;
+    }
+
+    .form-label {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: var(--title-color);
+        font-size: 0.95rem;
+    }
+
+    /* Estilos para clases que vienen desde forms.py (.form-control) */
+    .form-control {
+        width: 100%;
+        padding: 0.8rem 1rem;
+        border: 1px solid var(--border-color);
+        border-radius: 6px;
+        background-color: var(--bg-color);
+        color: var(--text-color);
+        font-size: 1rem;
+        transition: all 0.2s ease;
+        font-family: inherit;
+    }
+
+    .form-control:focus {
+        outline: none;
+        border-color: var(--header-bg);
+        box-shadow: 0 0 0 3px rgba(16, 134, 0, 0.1);
+    }
+
+    /* Estilo especial para Textarea (Contenido) */
+    textarea.form-control {
+        min-height: 200px;
+        resize: vertical;
+        line-height: 1.6;
+    }
+
+    /* Estilo para subir archivos (Imagen) */
+    input[type="file"] {
+        width: 100%;
+        padding: 1rem;
+        background: var(--bg-color);
+        border: 2px dashed var(--border-color);
+        border-radius: 6px;
+        cursor: pointer;
+        transition: border-color 0.2s;
+    }
+    input[type="file"]:hover {
+        border-color: var(--header-bg);
+    }
+
+    /* Estilo para el Checkbox (Destacado) */
+    .checkbox-container {
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background-color: var(--bg-color);
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+    .checkbox-container:hover {
+        background-color: rgba(0,0,0,0.02);
+    }
+    .checkbox-container input[type="checkbox"] {
+        width: 1.2rem;
+        height: 1.2rem;
+        margin-right: 10px;
+        accent-color: var(--header-bg);
+        cursor: pointer;
+    }
+    .checkbox-label-text {
+        font-weight: 600;
+        color: var(--title-color);
+    }
+
+    .help-text {
+        font-size: 0.85rem;
+        color: var(--footer-text);
+        margin-top: 6px;
+        display: block;
+    }
+
+    .error-list {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-top: 5px;
+        list-style: none;
+        padding: 0;
+    }
+
+    .form-actions {
+        margin-top: 2.5rem;
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-color);
+    }
+
+    .btn-save {
+        padding: 12px 28px;
+        background-color: var(--header-bg);
+        color: white;
+        border: none;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: bold;
+        cursor: pointer;
+        transition: transform 0.1s, background-color 0.2s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    .btn-save:hover {
+        background-color: #0a5c00;
+        transform: translateY(-1px);
+    }
+    .btn-save:active {
+        transform: translateY(0);
+    }
+
+    .btn-cancel {
+        color: var(--footer-text);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 10px 20px;
+        border-radius: 50px;
+        transition: background-color 0.2s, color 0.2s;
+    }
+    .btn-cancel:hover {
+        background-color: rgba(0,0,0,0.05);
+        color: var(--title-color);
+    }
+</style>
+
 {% endblock %}
