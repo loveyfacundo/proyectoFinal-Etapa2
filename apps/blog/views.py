@@ -26,18 +26,31 @@ from .models import (
 from .forms import ContactoForm
 
 def index(request):
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
+
     articulos_destacados = Articulo.objects.filter(destacado=True).order_by('-fecha_creacion')[:3]
-    ultimas_noticias = Articulo.objects.order_by('-fecha_creacion')[:6]
-    categorias = Categoria.objects.all()
+    
+    if orden == 'reciente':
+        ultimas_noticias = Articulo.objects.order_by(campo_orden)[:6]
+    else:
+        ultimas_noticias = Articulo.objects.order_by(campo_orden)
 
     context = {
         'destacados': articulos_destacados,
         'noticias': ultimas_noticias,
-        'categorias': categorias,
+        'orden_actual': orden, # Pasamos esto para que el select recuerde la opción
     }
     return render(request, 'pages/index.html', context)
 
-# Vista para la página "Acerca de"
+
 def about(request):
     return render(request, 'pages/about.html')
 
@@ -191,10 +204,22 @@ def contact(request):
 
 def listar_por_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
-    noticias = Articulo.objects.filter(categoria=categoria).order_by('-fecha_creacion')
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
+    
+    noticias = Articulo.objects.filter(categoria=categoria).order_by(campo_orden)
     
     context = {
         'noticias': noticias,
         'categoria_seleccionada': categoria,
+        'orden_actual': orden,
     }
     return render(request, 'pages/index.html', context)
+

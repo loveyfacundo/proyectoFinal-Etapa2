@@ -6,13 +6,39 @@
 
     <section class="home-grid">
         <div class="home-column">
-            <h2>Últimas Noticias</h2>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 10px;">
+                
+                <h2 style="margin: 0;">
+                    {% if categoria_seleccionada %}
+                        {{ categoria_seleccionada.nombre }}
+                    {% else %}
+                        Últimas Noticias
+                    {% endif %}
+                </h2>
+                
+                <form method="get" style="display: flex; align-items: center;">
+                    <label for="orden" style="margin-right: 8px; font-size: 0.9rem; color: var(--footer-text); font-weight: 500;">
+                        Ordenar por:
+                    </label>
+                    <select name="orden" id="orden" onchange="this.form.submit()" 
+                            style="padding: 6px 10px; border-radius: 6px; border: 1px solid var(--border-color); background-color: var(--bg-color); color: var(--text-color); cursor: pointer; font-size: 0.9rem;">
+                        <option value="reciente" {% if orden_actual == 'reciente' %}selected{% endif %}>Más recientes</option>
+                        <option value="antigua" {% if orden_actual == 'antigua' %}selected{% endif %}>Más antiguas</option>
+                        <option value="alpha_asc" {% if orden_actual == 'alpha_asc' %}selected{% endif %}>A - Z</option>
+                        <option value="alpha_desc" {% if orden_actual == 'alpha_desc' %}selected{% endif %}>Z - A</option>
+                    </select>
+                </form>
+
+            </div>
+
             <ul class="news-list">
                 {# 2. Iteramos las noticias usando el componente Card #}
                 {% for noticia in noticias %}
                     {% include 'components/card_articulo.html' with articulo=noticia %}
                 {% empty %}
-                    <p>No hay noticias recientes.</p>
+                    <div style="padding: 2rem; text-align: center; color: var(--footer-text); background: var(--news-thumb-bg); border-radius: 8px;">
+                        <p>No se encontraron noticias con este filtro.</p>
+                    </div>
                 {% endfor %}
             </ul>
         </div>
