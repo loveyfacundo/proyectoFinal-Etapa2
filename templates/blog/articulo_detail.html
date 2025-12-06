@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ articulo.titulo }} - TodoDeporte{% endblock %}
+
+{% block content %}
+
+<style>
+    .articulo-header {
+        margin-bottom: 2rem;
+        border-bottom: 1px solid var(--border-color);
+        padding-bottom: 1.5rem;
+    }
+    .articulo-category {
+        display: inline-block;
+        background-color: var(--header-bg);
+        color: #fff;
+        padding: 0.25rem 0.75rem;
+        border-radius: 50px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    .articulo-title {
+        font-size: 2.5rem;
+        line-height: 1.2;
+        color: var(--title-color);
+        margin-bottom: 1.5rem;
+        /* word-wrap asegura que títulos larguísimos no rompan el ancho */
+        word-wrap: break-word; 
+    }
+    /* Contenedor flexible para Autor vs Botones */
+    .articulo-meta-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap; /* Importante para móviles */
+        gap: 1rem;
+        font-size: 0.95rem;
+        color: var(--footer-text);
+    }
+    .articulo-author {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+    .articulo-actions {
+        display: flex;
+        gap: 0.5rem;
+    }
+    .btn-action {
+        padding: 0.4rem 0.8rem;
+        border-radius: 4px;
+        text-decoration: none;
+        font-size: 0.85rem;
+        font-weight: 600;
+        transition: opacity 0.2s;
+    }
+    .btn-action:hover {
+        opacity: 0.9;
+    }
+    .btn-edit { background-color: #ffc107; color: #212529; }
+    .btn-delete { background-color: #dc3545; color: #fff; }
+    
+    /* Imagen principal */
+    .articulo-figure {
+        margin: 0 0 2rem 0;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+    .articulo-img {
+        width: 100%;
+        height: auto;
+        max-height: 500px;
+        object-fit: cover;
+        display: block;
+    }
+
+    @media (max-width: 768px) {
+        .articulo-title { font-size: 2rem; }
+        .articulo-meta-row { flex-direction: column; align-items: flex-start; }
+    }
+</style>
+
+<article class="articulo-detalle" style="max-width: 900px; margin: 0 auto;">
+
+    <div style="margin-top: 2rem; text-align: center; margin-bottom: 3rem;">
+        <a href="{% url 'index' %}" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); color: var(--text-color); border-radius: 50px; text-decoration: none; transition: background 0.2s;">
+            ← Volver al inicio
+        </a>
+    </div>
+    
+    {# --- CABECERA  --- #}
+    <header class="articulo-header">
+        <span class="articulo-category">
+            {{ articulo.categoria.nombre }}
+        </span>
+
+        <h1 class="articulo-title">{{ articulo.titulo }}</h1>
+
+        <div class="articulo-meta-row">
+            
+            <div class="articulo-author">
+                <div style="width: 32px; height: 32px; background: #ddd; border-radius: 50%; display: grid; place-items: center;">
+                    <svg class="icon icon-sm" aria-hidden="true" style="color: #555;">
+                        <use href="{% static 'img/icons.svg' %}#user"></use>
+                    </svg>
+                </div>
+                <div>
+                    Por <strong>{{ articulo.autor.first_name|default:articulo.autor.username }}</strong>
+                    <span style="margin: 0 5px;">•</span>
+                    <time>{{ articulo.fecha_creacion|date:"d M Y" }}</time>
+                </div>
+            </div>
+
+            {% if user.is_superuser or user.perfil.rol == 'colaborador' %}
+                <div class="articulo-actions">
+                    <a href="{% url 'editar_articulo' articulo.id %}" class="btn-action btn-edit">
+                        Editar
+                    </a>
+                    <a href="{% url 'eliminar_articulo' articulo.id %}" class="btn-action btn-delete">
+                        Eliminar
+                    </a>
+                </div>
+            {% endif %}
+
+        </div>
+    </header>
+
+    {# --- IMAGEN DESTACADA --- #}
+    {% if articulo.imagen_destacada %}
+        <figure class="articulo-figure">
+            <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}" class="articulo-img">
+        </figure>
+    {% endif %}
+
+    {# --- CONTENIDO DEL ARTÍCULO --- #}
+    <div class="contenido" style="line-height: 1.8; font-size: 1.15rem; color: var(--text-color); margin-bottom: 4rem;">
+        {{ articulo.contenido|linebreaks }}
+    </div>
+
+    {# --- SECCIÓN DE COMENTARIOS  --- #}
+    <section style="background-color: var(--bg-color); padding: 2rem; border-radius: 8px; margin-top: 3rem;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">
+            Comentarios ({{ comentarios.count }})
+        </h3>
+
+        {# Formulario #}
+        {% if user.is_authenticated %}
+            <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 4px var(--card-shadow);">
+                <h4 style="margin-bottom: 1rem;">Deja tu opinión</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.contenido }}
+                    <button type="submit" style="margin-top: 10px; padding: 8px 20px; background: var(--header-bg); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
+                        Publicar
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <p style="margin-bottom: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px; color: #856404;">
+                Debes <a href="{% url 'login' %}?next={{ request.path }}" style="font-weight: bold; color: inherit;">iniciar sesión</a> para comentar.
+            </p>
+        {% endif %}
+
+        {# Lista #}
+        {% if comentarios %}
+            <ul style="list-style: none; padding: 0;">
+                {% for c in comentarios %}
+                    <li style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--card-bg); border-radius: 8px; box-shadow: 0 1px 3px var(--card-shadow);">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
+                            <div style="display: flex; gap: 10px; align-items: center;">
+                                <div style="width: 32px; height: 32px; background: #eee; border-radius: 50%; display: grid; place-items: center; color: #888; font-weight: bold; font-size: 0.8rem;">
+                                    {{ c.autor.username|slice:":1"|upper }}
+                                </div>
+                                <div>
+                                    <strong style="display: block; line-height: 1;">{{ c.autor.username }}</strong>
+                                    <span style="font-size: 0.8rem; color: var(--footer-text);">
+                                        {{ c.fecha_creacion|date:"d M Y, H:i" }}
+                                    </span>
+                                </div>
+                            </div>
+                            
+                            {% if user == c.autor or user.is_superuser or user.perfil.rol == 'colaborador' %}
+                                <div style="font-size: 0.85rem;">
+                                    <a href="{% url 'editar_comentario' c.id %}" style="color: #007bff; text-decoration: none; margin-right: 10px; font-weight: 600;">
+                                        {% if user == c.autor %}Editar{% else %}Moderar{% endif %}
+                                    </a>
+                                    <a href="{% url 'eliminar_comentario' c.id %}" style="color: #dc3545; text-decoration: none; font-weight: 600;">
+                                        Eliminar
+                                    </a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div style="line-height: 1.6; margin-left: 42px;">
+                            {{ c.contenido|linebreaks }}
+                        </div>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p style="color: var(--footer-text); font-style: italic;">No hay comentarios aún.</p>
+        {% endif %}
+    </section>
+
+    <div style="margin-top: 3rem; text-align: center;">
+        <a href="{% url 'index' %}" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); color: var(--text-color); border-radius: 50px; text-decoration: none; transition: background 0.2s;">
+            ← Volver al inicio
+        </a>
+    </div>
+
+</article>
+{% endblock %}

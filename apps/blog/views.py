@@ -1,31 +1,226 @@
-from django.shortcuts import render
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render
+)
 
-# Vistas de páginas principales
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login
+from django.contrib.auth.models import User
+from django.contrib.auth.decorators import login_required, user_passes_test
+
+from apps.blog.forms import (
+    ArticuloForm,
+    RegistroForm,
+    ComentarioForm
+)
+
+from .models import (
+    Articulo,
+    Categoria,
+    Comentario
+)
+
+from .forms import ContactoForm
+
 def index(request):
-    """Vista para la página de inicio"""
-    return render(request, 'index.html')
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
+
+    articulos_destacados = Articulo.objects.filter(destacado=True).order_by('-fecha_creacion')[:3]
+    
+    if orden == 'reciente':
+        ultimas_noticias = Articulo.objects.order_by(campo_orden)[:6]
+    else:
+        ultimas_noticias = Articulo.objects.order_by(campo_orden)
+
+    context = {
+        'destacados': articulos_destacados,
+        'noticias': ultimas_noticias,
+        'orden_actual': orden, # Pasamos esto para que el select recuerde la opción
+    }
+    return render(request, 'pages/index.html', context)
 
 
 def about(request):
-    """Vista para la página Acerca de"""
-    return render(request, 'about.html')
+    return render(request, 'pages/about.html')
 
+def detalle_articulo(request, id):
+    articulo = get_object_or_404(Articulo, id=id)
+    comentarios = articulo.comentarios.all().order_by('-fecha_creacion')
+    form = ComentarioForm()
+
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            form = ComentarioForm(request.POST)
+            if form.is_valid():
+                comentario = form.save(commit=False)
+                comentario.articulo = articulo
+                comentario.autor = request.user
+                comentario.save()
+                return redirect('detalle_articulo', id=id)
+        else:
+            return redirect('login')
+        
+    context = {
+        'articulo': articulo,
+        'comentarios': comentarios,
+        'form': form,
+    }
+    return render(request, 'blog/articulo_detail.html', context)
+
+def registro(request):
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            login(request, usuario)
+            return redirect('index') # Redirigir al inicio
+    else:
+        form = RegistroForm()
+    return render(request, 'users/register.html', {'form': form})
+
+# --- Verifica si es superusuario O si tiene el rol de colaborador en su perfil ---
+def es_colaborador(user):
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.rol == 'colaborador'))
+
+@user_passes_test(es_colaborador)
+def crear_articulo(request):
+    if request.method == 'POST':
+        form = ArticuloForm(request.POST, request.FILES)
+        if form.is_valid():
+            articulo = form.save(commit=False)
+            articulo.autor = request.user
+            articulo.save()
+            return redirect('detalle_articulo', id=articulo.id)
+    else:
+        form = ArticuloForm()
+    return render(request, 'blog/articulo_form.html', {'form': form, 'titulo': 'Crear Nuevo Artículo'})
+
+@user_passes_test(es_colaborador)
+def editar_articulo(request, id):
+    articulo = get_object_or_404(Articulo, id=id)
+    if request.method == 'POST':
+        form = ArticuloForm(request.POST, request.FILES, instance=articulo)
+        if form.is_valid():
+            form.save()
+            return redirect('detalle_articulo', id=articulo.id)
+    else:
+        form = ArticuloForm(instance=articulo)
+    return render(request, 'blog/articulo_form.html', {'form': form, 'titulo': 'Editar Artículo'})
+
+@user_passes_test(es_colaborador)
+def eliminar_articulo(request, id):
+    articulo = get_object_or_404(Articulo, id=id)
+    if request.method == 'POST':
+        articulo.delete()
+        return redirect('index')
+    return render(request, 'blog/articulo_confirm_delete.html', {'articulo': articulo})
+
+@login_required
+def editar_comentario(request, id):
+    comentario = get_object_or_404(Comentario, id=id)
+    es_autor = request.user == comentario.autor
+    es_colaborador = request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.rol == 'colaborador')
+    if not es_autor and not es_colaborador:
+        return redirect('detalle_articulo', id=comentario.articulo.id)
+
+    if request.method == 'POST':
+        form = ComentarioForm(request.POST, instance=comentario)
+        if form.is_valid():
+            form.save()
+            return redirect('detalle_articulo', id=comentario.articulo.id)
+    else:
+        form = ComentarioForm(instance=comentario)
+
+    titulo = "Editar Comentario" if es_autor else f"Moderando comentario de {comentario.autor.username}"
+    
+    return render(request, 'blog/comentario_form.html', {
+        'form': form, 
+        'comentario': comentario,
+        'titulo_pagina': titulo 
+    })
+
+@login_required
+def eliminar_comentario(request, id):
+    comentario = get_object_or_404(Comentario, id=id)
+    es_autor = request.user == comentario.autor
+    es_colaborador = request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.rol == 'colaborador')
+
+    if not es_autor and not es_colaborador:
+        return redirect('detalle_articulo', id=comentario.articulo.id)
+    
+    if request.method == 'POST':
+        articulo_id = comentario.articulo.id
+        comentario.delete()
+        return redirect('detalle_articulo', id=articulo_id)
+    
+    return render(request, 'blog/comentario_confirm_delete.html', {'comentario': comentario})
 
 def contact(request):
-    """Vista para la página de Contacto"""
-    return render(request, 'contact.html')
+    if request.method == 'POST':
+        form = ContactoForm(request.POST)
+        if form.is_valid():
+            mensaje_nuevo = form.save()
+
+            asunto = f'Nuevo mensaje de contacto de {mensaje_nuevo.nombre}'
+            cuerpo_mensaje = f"""
+            Has recibido un nuevo mensaje desde TodoDeporte:
+            
+            Nombre: {mensaje_nuevo.nombre}
+            Email: {mensaje_nuevo.email}
+            Mensaje: 
+            {mensaje_nuevo.mensaje}
+            """
+            
+            emails_admins = User.objects.filter(is_superuser=True).values_list('email', flat=True)
+
+            try:
+                send_mail(
+                    asunto,
+                    cuerpo_mensaje,
+                    settings.EMAIL_HOST_USER if hasattr(settings, 'EMAIL_HOST_USER') else 'noreply@tododeporte.com',
+                    list(emails_admins), # Lista de destinatarios
+                    fail_silently=False,
+                )
+                messages.success(request, '¡Tu mensaje ha sido enviado correctamente!')
+                return redirect('contact') # Redirigir a la misma página para limpiar el form
+            except Exception as e:
+                messages.error(request, 'Ocurrió un error al enviar el correo. Inténtalo más tarde.')
+                
+    else:
+        form = ContactoForm()
+
+    return render(request, 'pages/contact.html', {'form': form})
+
+def listar_por_categoria(request, categoria_id):
+    categoria = get_object_or_404(Categoria, id=categoria_id)
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
+    
+    noticias = Articulo.objects.filter(categoria=categoria).order_by(campo_orden)
+    
+    context = {
+        'noticias': noticias,
+        'categoria_seleccionada': categoria,
+        'orden_actual': orden,
+    }
+    return render(request, 'pages/index.html', context)
 
 
-def register(request):
-    """Vista para la página de Registro"""
-    return render(request, 'register.html')
-
-
-def login(request):
-    """Vista para la página de Inicio de Sesión"""
-    return render(request, 'login.html')
-
-
-def terms(request):
-    """Vista para la página de Términos y Condiciones"""
-    return render(request, 'terms.html')

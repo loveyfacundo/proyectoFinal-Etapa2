@@ -1,0 +1,16 @@
+<li class="news-item">
+    <div class="news-thumb">
+        {% if articulo.imagen_destacada %}
+        <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}"
+            style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
+        {% endif %}
+    </div>
+    <div class="news-meta">
+        <a href="{% url 'detalle_articulo' articulo.id %}" class="news-title">
+            {{ articulo.titulo }}
+        </a>
+        <div class="news-info">
+            {{ articulo.categoria.nombre }} • {{ articulo.fecha_creacion|date:"d M Y" }}
+        </div>
+    </div>
+</li>

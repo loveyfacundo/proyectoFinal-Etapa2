@@ -1,0 +1,112 @@
+{% load static %}
+<header>
+    <div class="header-bar">
+        <h1 class="header-title">TodoDeporte</h1>
+        <nav class="nav" aria-label="Principal">
+            <ul class="nav-links">
+                <li class="nav-link">
+                    <a href="{% url 'index' %}"
+                        class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Inicio</a>
+                </li>
+                <li class="nav-link dropdown">
+                    <button class="dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+                        Deportes
+                        <svg class="icon icon-sm" aria-hidden="true">
+                            <use href="{% static 'img/icons.svg' %}#chevron-down"></use>
+                        </svg>
+                    </button>
+                    <ul class="dropdown-menu" aria-label="Categorías">
+                        {% for cat in categorias_globales %}
+                            <li>
+                                <a href="{% url 'listar_por_categoria' cat.id %}">
+                                    {{ cat.nombre }}
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li><a href="#">Sin categorías</a></li>
+                        {% endfor %}
+                    </ul>
+                </li>
+                <li class="nav-link">
+                    <a href="{% url 'about' %}"
+                        class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">Acerca de</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{% url 'contact' %}"
+                        class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contacto</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="profile-menu">
+            {# Botón Tema #}
+            <button class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+                <svg class="icon icon-md theme-icon" aria-hidden="true">
+                    <use href="{% static 'img/icons.svg' %}#sun"></use>
+                </svg>
+            </button>
+
+            {# --- MODIFICACIÓN AQUÍ: Botón de Perfil con Texto --- #}
+            <button class="profile-toggle" aria-label="Menú de usuario" aria-haspopup="true" aria-expanded="false" 
+                    style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
+                
+                <div class="profile-avatar">
+                    <svg class="icon icon-md" aria-hidden="true">
+                        <use href="{% static 'img/icons.svg' %}#user"></use>
+                    </svg>
+                </div>
+
+                <span style="font-weight: 500; font-size: 0.95rem; display:block; @media (min-width: 768px) { display: inline; }">
+                    {% if user.is_authenticated %}
+                        {{ user.first_name }}
+                    {% else %}
+                        Iniciar Sesión
+                    {% endif %}
+                </span>
+                
+                <svg class="icon icon-sm" aria-hidden="true" style="opacity: 0.8;">
+                    <use href="{% static 'img/icons.svg' %}#chevron-down"></use>
+                </svg>
+            </button>
+
+            <div class="profile-dropdown" aria-label="Opciones de usuario">
+                
+                {% if user.is_authenticated %}
+                    <div class="profile-menu-logged">
+                        {% if user.is_superuser or user.perfil.rol == 'colaborador' %}
+                            <a href="{% url 'crear_articulo' %}" class="profile-item">
+                                <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#plus"></use></svg> <span>Crear Artículo</span>
+                            </a>
+                        {% endif %}
+                        
+                        <a href="#" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
+                            <span>Mi Perfil</span>
+                        </a>
+                        
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="profile-item profile-item-logout" style="width: 100%; border: none; background: none; cursor: pointer; text-align: left; font-size: 1rem;">
+                                <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#logout"></use></svg>
+                                <span>Cerrar Sesión</span>
+                            </button>
+                        </form>
+                    </div>
+
+                {% else %}
+                    <div class="profile-menu-guest">
+                        <a href="{% url 'registro' %}" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
+                            <span>Registrarse</span>
+                        </a>
+                        <a href="{% url 'login' %}" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#login"></use></svg>
+                            <span>Iniciar Sesión</span>
+                        </a>
+                    </div>
+                {% endif %}
+                
+            </div>
+        </div>
+    </div>
+</header>
