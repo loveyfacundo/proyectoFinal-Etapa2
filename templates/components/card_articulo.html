@@ -6,7 +6,11 @@
         {% endif %}
     </div>
     <div class="news-meta">
-        <a href="#" class="news-title">{{ articulo.titulo }}</a>
-        <div class="news-info">{{ articulo.categoria.nombre }} • {{ articulo.fecha_creacion|date:"d M Y" }}</div>
+        <a href="{% url 'detalle_articulo' articulo.id %}" class="news-title">
+            {{ articulo.titulo }}
+        </a>
+        <div class="news-info">
+            {{ articulo.categoria.nombre }} • {{ articulo.fecha_creacion|date:"d M Y" }}
+        </div>
     </div>
 </li>

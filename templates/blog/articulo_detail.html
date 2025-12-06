@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ articulo.titulo }} - TodoDeporte{% endblock %}
+
+{% block content %}
+<article class="articulo-detalle" style="max-width: 800px; margin: 0 auto;">
+    
+    {# Cabecera del artículo #}
+    <header style="margin-bottom: 2rem;">
+        <span class="badge" style="background: var(--header-bg); color: #fff; padding: 4px 8px; border-radius: 4px; font-size: 0.9rem;">
+            {{ articulo.categoria.nombre }}
+        </span>
+        <h1 style="margin-top: 10px; font-size: 2.5rem; color: var(--title-color);">{{ articulo.titulo }}</h1>
+        <div class="meta" style="color: var(--footer-text); margin-top: 10px;">
+            Por <strong>{{ articulo.autor.first_name|default:articulo.autor.username }}</strong> 
+            | {{ articulo.fecha_creacion|date:"d de F de Y" }}
+        </div>
+    </header>
+
+    {# Imagen Destacada #}
+    {% if articulo.imagen_destacada %}
+        <figure style="margin-bottom: 2rem;">
+            <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}" style="width: 100%; border-radius: 8px; max-height: 400px; object-fit: cover;">
+        </figure>
+    {% endif %}
+
+    {# Contenido Principal #}
+    <div class="contenido" style="line-height: 1.8; font-size: 1.1rem; color: var(--text-color);">
+        {# linebreaks convierte los saltos de línea del admin en párrafos HTML <p> #}
+        {{ articulo.contenido|linebreaks }}
+    </div>
+
+    <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0;">
+
+    {# Sección de Comentarios (Placeholder por ahora) #}
+    <section>
+        <h3>Comentarios ({{ comentarios.count }})</h3>
+        {% if comentarios %}
+            <ul>
+                {% for c in comentarios %}
+                    <li style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-color); border-radius: 8px;">
+                        <strong>{{ c.autor.username }}</strong> dijo:
+                        <p>{{ c.contenido }}</p>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% else %}
+            <p>No hay comentarios aún. ¡Sé el primero!</p>
+        {% endif %}
+    </section>
+
+    {# Botón Volver #}
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'index' %}" style="text-decoration: none; color: var(--link-color); font-weight: bold;">← Volver al inicio</a>
+    </div>
+
+</article>
+{% endblock %}

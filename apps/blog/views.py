@@ -1,5 +1,12 @@
-from django.shortcuts import render
-from .models import Articulo, Categoria
+from django.shortcuts import (
+    get_object_or_404,
+    render
+)
+
+from .models import (
+    Articulo,
+    Categoria
+)
 
 def index(request):
     # Traemos los artículos destacados para el carrusel
@@ -26,3 +33,15 @@ def about(request):
 def contact(request):
     return render(request, 'pages/contact.html')
 
+def detalle_articulo(request, id):
+    # Busca el artículo o devuelve error 404 si no existe
+    articulo = get_object_or_404(Articulo, id=id)
+    
+    # Opcional: Traer comentarios relacionados (si ya quieres prepararlo)
+    comentarios = articulo.comentarios.all()
+
+    context = {
+        'articulo': articulo,
+        'comentarios': comentarios,
+    }
+    return render(request, 'blog/articulo_detail.html', context)
