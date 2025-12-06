@@ -1,39 +1,59 @@
 {% load static %}
 <section class="carrusel" aria-label="Noticias destacadas">
     <div class="carrusel-track">
+
+        {# Botón Anterior #}
         <button class="carrusel-nav carrusel-prev" aria-label="Anterior">
             <svg class="icon icon-md" aria-hidden="true">
                 <use href="{% static 'img/icons.svg' %}#chevron-left"></use>
             </svg>
         </button>
 
+        {# --- SLIDES --- #}
         {% for articulo in destacados %}
         <div class="carrusel-slide {% if forloop.first %}active{% endif %}">
-            {% if articulo.imagen_destacada %}
-            <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}">
-            {% else %}
-            <img src="{% static 'img/hero-1.svg' %}" alt="Imagen por defecto">
-            {% endif %}
-            {# Opcional: Agregar título sobre la imagen #}
+            <a href="{% url 'detalle_articulo' articulo.id %}" style="display: block; width: 100%; height: 100%;">
+                {% if articulo.imagen_destacada %}
+                <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}">
+                {% else %}
+                <img src="{% static 'img/hero-1.svg' %}" alt="Imagen por defecto">
+                {% endif %}
+
+                <div class="carrusel-caption"
+                    style="position: absolute; bottom: 40px; left: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 4px;">
+                    <h3>{{ articulo.titulo }}</h3>
+                </div>
+            </a>
         </div>
         {% empty %}
         <div class="carrusel-slide active">
-            <img src="{% static 'img/hero-1.svg' %}" alt="Bienvenido">
+            <img src="{% static 'img/hero-1.svg' %}" alt="Bienvenido a TodoDeporte">
+        </div>
+        <div class="carrusel-slide">
+            <img src="{% static 'img/hero-2.svg' %}" alt="Noticias al instante">
+        </div>
+        <div class="carrusel-slide">
+            <img src="{% static 'img/hero-3.svg' %}" alt="El mejor análisis">
         </div>
         {% endfor %}
 
+        {# Botón Siguiente #}
         <button class="carrusel-nav carrusel-next" aria-label="Siguiente">
             <svg class="icon icon-md" aria-hidden="true">
                 <use href="{% static 'img/icons.svg' %}#chevron-right"></use>
             </svg>
         </button>
 
+        {# --- PUNTOS INDICADORES (DOTS) --- #}
         <div class="carrusel-dots" aria-hidden="true">
             {% for articulo in destacados %}
             <span class="dot {% if forloop.first %}active{% endif %}"></span>
             {% empty %}
             <span class="dot active"></span>
+            <span class="dot"></span>
+            <span class="dot"></span>
             {% endfor %}
         </div>
+
     </div>
 </section>
