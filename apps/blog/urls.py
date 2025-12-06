@@ -21,6 +21,9 @@ urlpatterns = [
     # GESTIÓN DE CATEGORÍAS
     path('categoria/<int:categoria_id>/', views.listar_por_categoria, name='listar_por_categoria'),
 
+    # GESTIÓN DE USUARIOS (ADMIN)
+    path('admin/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
+
     # RUTAS DE AUTENTICACIÓN
     path('registro/', views.registro, name='registro'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
