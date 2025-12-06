@@ -16,10 +16,15 @@
                         </svg>
                     </button>
                     <ul class="dropdown-menu" aria-label="Categorías">
-                        {# Aquí podrías iterar categorías si las pasas en un context processor #}
-                        <li><a href="#">Fútbol</a></li>
-                        <li><a href="#">F1</a></li>
-                        <li><a href="#">Vóley</a></li>
+                        {% for cat in categorias_globales %}
+                            <li>
+                                <a href="{% url 'listar_por_categoria' cat.id %}">
+                                    {{ cat.nombre }}
+                                </a>
+                            </li>
+                        {% empty %}
+                            <li><a href="#">Sin categorías</a></li>
+                        {% endfor %}
                     </ul>
                 </li>
                 <li class="nav-link">

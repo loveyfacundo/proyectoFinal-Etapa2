@@ -258,3 +258,16 @@ def contact(request):
         form = ContactoForm()
 
     return render(request, 'pages/contact.html', {'form': form})
+
+def listar_por_categoria(request, categoria_id):
+    categoria = get_object_or_404(Categoria, id=categoria_id)
+    # Filtramos los artículos que pertenecen a esta categoría
+    noticias = Articulo.objects.filter(categoria=categoria).order_by('-fecha_creacion')
+    
+    context = {
+        'noticias': noticias,
+        'categoria_seleccionada': categoria,
+        # Nota: No necesitamos pasar 'categorias' aquí, porque el context_processor ya lo hace globalmente
+    }
+    # Reutilizamos el template index.html o index.html (ahora pages/index.html) para mostrar la lista
+    return render(request, 'pages/index.html', context)

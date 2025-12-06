@@ -19,6 +19,9 @@ urlpatterns = [
     path('editar/<int:id>/', views.editar_articulo, name='editar_articulo'),
     path('eliminar/<int:id>/', views.eliminar_articulo, name='eliminar_articulo'),
 
+    # Rutas para Categorías
+    path('categoria/<int:categoria_id>/', views.listar_por_categoria, name='listar_por_categoria'),
+
     # RUTAS DE AUTENTICACIÓN
     path('registro/', views.registro, name='registro'),
     
