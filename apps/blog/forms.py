@@ -8,7 +8,6 @@ class RegistroForm(UserCreationForm):
     class Meta:
         model = User
         fields = ['username', 'first_name', 'last_name', 'email']
-        # Django se encarga de las contraseñas automáticamente con UserCreationForm
 
 class ComentarioForm(forms.ModelForm):
     class Meta:
