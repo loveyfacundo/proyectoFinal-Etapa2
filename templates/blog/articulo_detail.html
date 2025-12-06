@@ -34,19 +34,59 @@
     <hr style="border: 0; border-top: 1px solid var(--border-color); margin: 3rem 0;">
 
     {# Sección de Comentarios (Placeholder por ahora) #}
-    <section>
-        <h3>Comentarios ({{ comentarios.count }})</h3>
+    <section style="margin-top: 3rem;">
+        <h3 style="margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">
+            Comentarios ({{ comentarios.count }})
+        </h3>
+
+        {# 1. Formulario de Nuevo Comentario #}
+        {% if user.is_authenticated %}
+            <div style="background: var(--bg-color); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem;">
+                <h4 style="margin-bottom: 1rem;">Deja tu opinión</h4>
+                <form method="post">
+                    {% csrf_token %}
+                    {{ form.contenido }}
+                    <button type="submit" style="margin-top: 10px; padding: 8px 16px; background: var(--header-bg); color: white; border: none; border-radius: 4px; cursor: pointer;">
+                        Publicar Comentario
+                    </button>
+                </form>
+            </div>
+        {% else %}
+            <p style="margin-bottom: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px; color: #856404;">
+                Debes <a href="{% url 'login' %}?next={{ request.path }}" style="font-weight: bold; color: inherit;">iniciar sesión</a> para comentar.
+            </p>
+        {% endif %}
+
+        {# 2. Lista de Comentarios #}
         {% if comentarios %}
-            <ul>
+            <ul style="list-style: none; padding: 0;">
                 {% for c in comentarios %}
-                    <li style="margin-bottom: 1rem; padding: 1rem; background: var(--bg-color); border-radius: 8px;">
-                        <strong>{{ c.autor.username }}</strong> dijo:
-                        <p>{{ c.contenido }}</p>
+                    <li style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--card-bg); border-radius: 8px; box-shadow: 0 2px 4px var(--card-shadow);">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <div>
+                                <strong style="font-size: 1.1em;">{{ c.autor.username }}</strong>
+                                <span style="font-size: 0.85em; color: var(--footer-text); margin-left: 10px;">
+                                    {{ c.fecha_creacion|date:"d M Y, H:i" }}
+                                </span>
+                            </div>
+                            
+                            {# Botones de Acción (Solo para el dueño) #}
+                            {% if user == c.autor %}
+                                <div style="font-size: 0.9em;">
+                                    <a href="{% url 'editar_comentario' c.id %}" style="color: #007bff; text-decoration: none; margin-right: 10px;">Editar</a>
+                                    <a href="{% url 'eliminar_comentario' c.id %}" style="color: #dc3545; text-decoration: none;">Eliminar</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <div style="line-height: 1.6;">
+                            {{ c.contenido|linebreaks }}
+                        </div>
                     </li>
                 {% endfor %}
             </ul>
         {% else %}
-            <p>No hay comentarios aún. ¡Sé el primero!</p>
+            <p style="color: var(--footer-text);">No hay comentarios aún. ¡Sé el primero en opinar!</p>
         {% endif %}
     </section>
 

@@ -10,6 +10,10 @@ urlpatterns = [
     # URL para poder ver detalle de un artículo
     path('articulo/<int:id>/', views.detalle_articulo, name='detalle_articulo'),
 
+    # Rutas para Comentarios
+    path('comentario/editar/<int:id>/', views.editar_comentario, name='editar_comentario'),
+    path('comentario/eliminar/<int:id>/', views.eliminar_comentario, name='eliminar_comentario'),
+
     # RUTAS DE AUTENTICACIÓN
     path('registro/', views.registro, name='registro'),
     
