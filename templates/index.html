@@ -67,23 +67,9 @@
             </div>
           </button>
           <div class="profile-dropdown" aria-label="Opciones de usuario">
-            <!-- Menú de invitado -->
-            <div class="profile-menu-guest">
-              <a href="#" class="profile-item">
-                <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#user"></use>
-                </svg>
-                <span>Registrarse</span>
-              </a>
-              <a href="#" class="profile-item">
-                <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#login"></use>
-                </svg>
-                <span>Iniciar Sesión</span>
-              </a>
-            </div>
-            <!-- Menú de usuario conectado (oculto por defecto) -->
-            <div class="profile-menu-logged" style="display: none">
+            {% if user.is_authenticated %}
+            <!-- Menú de usuario conectado -->
+            <div class="profile-menu-logged">
               <a href="#" class="profile-item">
                 <svg class="icon icon-sm" aria-hidden="true">
                   <use href="{% static 'img/icons.svg' %}#user"></use>
@@ -97,6 +83,23 @@
                 <span>Cerrar Sesión</span>
               </a>
             </div>
+            {% else %}
+            <!-- Menú de invitado -->
+            <div class="profile-menu-guest">
+              <a href="{% url 'register' %}" class="profile-item">
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#user"></use>
+                </svg>
+                <span>Registrarse</span>
+              </a>
+              <a href="{% url 'login' %}" class="profile-item">
+                <svg class="icon icon-sm" aria-hidden="true">
+                  <use href="{% static 'img/icons.svg' %}#login"></use>
+                </svg>
+                <span>Iniciar Sesión</span>
+              </a>
+            </div>
+            {% endif %}
           </div>
         </div>
       </div>

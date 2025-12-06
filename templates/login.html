@@ -1,0 +1,151 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Iniciar Sesión - TodoDeporte</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body>
+    <header>
+      <div class="header-bar">
+        <h1 class="header-title">TodoDeporte</h1>
+        <nav class="nav" aria-label="Principal">
+          <ul class="nav-links">
+            <li class="nav-link"><a href="{% url 'index' %}">Inicio</a></li>
+            <li class="nav-link"><a href="{% url 'about' %}">Acerca de</a></li>
+            <li class="nav-link"><a href="{% url 'contact' %}">Contacto</a></li>
+          </ul>
+        </nav>
+        <div class="profile-menu">
+          <button
+            class="theme-toggle"
+            aria-label="Cambiar tema"
+            title="Cambiar tema"
+          >
+            <svg class="icon icon-md theme-icon" aria-hidden="true">
+              <use href="{% static 'img/icons.svg' %}#sun"></use>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="auth">
+        <h2 style="margin-bottom: 1rem">Iniciar Sesión</h2>
+        <form
+          class="auth-form"
+          action="{% url 'login' %}"
+          method="post"
+          novalidate
+        >
+          {% csrf_token %}
+          <div class="form-row">
+            <label for="id_username">Usuario o Email</label>
+            <input
+              id="id_username"
+              name="username"
+              type="text"
+              required
+              placeholder="tuusuario"
+              autocomplete="username"
+            />
+          </div>
+          <div class="form-row">
+            <label for="id_password">Contraseña</label>
+            <input
+              id="id_password"
+              name="password"
+              type="password"
+              required
+              placeholder="••••••••"
+              autocomplete="current-password"
+            />
+          </div>
+          <div class="form-row form-inline">
+            <label class="checkbox">
+              <input type="checkbox" name="remember" />
+              <span>Recordarme</span>
+            </label>
+            <a class="link" href="#">¿Olvidaste tu contraseña?</a>
+          </div>
+          <div class="form-actions">
+            <button type="submit" class="btn-primary">Entrar</button>
+            <p class="form-hint">
+              ¿No tienes cuenta?
+              <a class="link" href="{% url 'register' %}">Regístrate</a>
+            </p>
+          </div>
+        </form>
+      </section>
+    </main>
+
+    <footer>
+      <p class="footer-copy">&copy; 2025 TodoDeporte</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <style>
+      .auth {
+        max-width: 520px;
+        margin: 2rem auto;
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px var(--card-shadow);
+      }
+      .auth-form {
+        display: grid;
+        gap: 1rem;
+      }
+      .form-row {
+        display: grid;
+        gap: 0.5rem;
+      }
+      .form-row input {
+        padding: 0.6rem 0.75rem;
+        border-radius: 6px;
+        border: 1px solid var(--border-color);
+        background: var(--card-bg);
+        color: var(--text-color);
+      }
+      .form-inline {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .checkbox {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+      }
+      .btn-primary {
+        padding: 0.6rem 0.9rem;
+        border: none;
+        border-radius: 6px;
+        background: #108600;
+        color: #fff;
+        cursor: pointer;
+      }
+      .btn-primary:hover {
+        background: #0c6c00;
+      }
+      .form-actions {
+        display: grid;
+        gap: 0.5rem;
+      }
+      .form-hint {
+        color: var(--footer-text);
+      }
+      .link {
+        color: var(--link-color);
+        text-decoration: none;
+      }
+      .link:hover {
+        text-decoration: underline;
+      }
+    </style>
+  </body>
+</html>
