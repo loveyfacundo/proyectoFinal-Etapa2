@@ -1,0 +1,60 @@
+{% load static %}
+<header>
+    <div class="header-bar">
+        <h1 class="header-title">TodoDeporte</h1>
+        <nav class="nav" aria-label="Principal">
+            <ul class="nav-links">
+                <li class="nav-link">
+                    <a href="{% url 'index' %}"
+                        class="{% if request.resolver_match.url_name == 'index' %}active{% endif %}">Inicio</a>
+                </li>
+                <li class="nav-link dropdown">
+                    <button class="dropdown-toggle" type="button" aria-haspopup="true" aria-expanded="false">
+                        Deportes
+                        <svg class="icon icon-sm" aria-hidden="true">
+                            <use href="{% static 'img/icons.svg' %}#chevron-down"></use>
+                        </svg>
+                    </button>
+                    <ul class="dropdown-menu" aria-label="Categorías">
+                        {# Aquí podrías iterar categorías si las pasas en un context processor #}
+                        <li><a href="#">Fútbol</a></li>
+                        <li><a href="#">F1</a></li>
+                        <li><a href="#">Vóley</a></li>
+                    </ul>
+                </li>
+                <li class="nav-link">
+                    <a href="{% url 'about' %}"
+                        class="{% if request.resolver_match.url_name == 'about' %}active{% endif %}">Acerca de</a>
+                </li>
+                <li class="nav-link">
+                    <a href="{% url 'contact' %}"
+                        class="{% if request.resolver_match.url_name == 'contact' %}active{% endif %}">Contacto</a>
+                </li>
+            </ul>
+        </nav>
+
+        <div class="profile-menu">
+            {# Botón Tema #}
+            <button class="theme-toggle" aria-label="Cambiar tema" title="Cambiar tema">
+                <svg class="icon icon-md theme-icon" aria-hidden="true">
+                    <use href="{% static 'img/icons.svg' %}#sun"></use>
+                </svg>
+            </button>
+
+            {# Menú Usuario (Simplificado para el ejemplo) #}
+            <button class="profile-toggle" aria-label="Menú de usuario" aria-haspopup="true" aria-expanded="false">
+                <div class="profile-avatar">
+                    <svg class="icon icon-md" aria-hidden="true">
+                        <use href="{% static 'img/icons.svg' %}#user"></use>
+                    </svg>
+                </div>
+            </button>
+            <div class="profile-dropdown" aria-label="Opciones de usuario">
+                <div class="profile-menu-guest">
+                    <a href="#" class="profile-item"><span>Registrarse</span></a>
+                    <a href="#" class="profile-item"><span>Iniciar Sesión</span></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>

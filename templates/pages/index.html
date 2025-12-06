@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    {# 1. Insertamos el Carrusel #}
+    {% include 'components/hero_carrusel.html' %}
+
+    <section class="home-grid">
+        <div class="home-column">
+            <h2>Últimas Noticias</h2>
+            <ul class="news-list">
+                {# 2. Iteramos las noticias usando el componente Card #}
+                {% for noticia in noticias %}
+                    {% include 'components/card_articulo.html' with articulo=noticia %}
+                {% empty %}
+                    <p>No hay noticias recientes.</p>
+                {% endfor %}
+            </ul>
+        </div>
+
+        {# Barra lateral de categorías #}
+        <aside class="home-column">
+            <h2>Categorías Populares</h2>
+            <ul class="category-list">
+                {% for cat in categorias %}
+                    <li><a href="#">{{ cat.nombre }}</a></li>
+                {% endfor %}
+            </ul>
+            <div class="category-promo"></div>
+        </aside>
+    </section>
+{% endblock %}
