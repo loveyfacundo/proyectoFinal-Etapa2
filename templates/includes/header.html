@@ -50,10 +50,40 @@
                 </div>
             </button>
             <div class="profile-dropdown" aria-label="Opciones de usuario">
-                <div class="profile-menu-guest">
-                    <a href="#" class="profile-item"><span>Registrarse</span></a>
-                    <a href="#" class="profile-item"><span>Iniciar Sesión</span></a>
-                </div>
+                
+                {% if user.is_authenticated %}
+                    <div class="profile-menu-logged">
+                        <div style="padding: 0.75rem 1rem; border-bottom: 1px solid var(--border-color); font-weight: bold;">
+                            Hola, {{ user.username }}
+                        </div>
+                        
+                        <a href="#" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
+                            <span>Mi Perfil</span>
+                        </a>
+                        
+                        <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                            {% csrf_token %}
+                            <button type="submit" class="profile-item profile-item-logout" style="width: 100%; border: none; background: none; cursor: pointer; text-align: left; font-size: 1rem;">
+                                <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#logout"></use></svg>
+                                <span>Cerrar Sesión</span>
+                            </button>
+                        </form>
+                    </div>
+
+                {% else %}
+                    <div class="profile-menu-guest">
+                        <a href="{% url 'registro' %}" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
+                            <span>Registrarse</span>
+                        </a>
+                        <a href="{% url 'login' %}" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#login"></use></svg>
+                            <span>Iniciar Sesión</span>
+                        </a>
+                    </div>
+                {% endif %}
+                
             </div>
         </div>
     </div>

@@ -1,0 +1,30 @@
+{% extends 'base.html' %}
+
+{% block title %}Crear Cuenta - TodoDeporte{% endblock %}
+
+{% block content %}
+<section style="max-width: 400px; margin: 2rem auto; padding: 2rem; background: var(--card-bg); border-radius: 8px; box-shadow: 0 4px 6px var(--card-shadow);">
+    <h2 style="text-align: center; margin-bottom: 1.5rem;">Únete a TodoDeporte</h2>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        {% for field in form %}
+            <div style="margin-bottom: 1rem;">
+                <label style="display:block; margin-bottom: .5rem;">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small style="color: #666; display: block; margin-top: 4px;">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div style="color: red; font-size: 0.9rem;">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+        
+        <button type="submit" style="width: 100%; padding: 0.75rem; background: var(--header-bg); color: white; border: none; border-radius: 4px; font-size: 1rem; cursor: pointer;">
+            Registrarse
+        </button>
+    </form>
+</section>
+{% endblock %}

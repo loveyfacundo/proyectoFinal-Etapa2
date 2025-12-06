@@ -115,28 +115,28 @@ document.addEventListener("click", (e) => {
   });
 
   // Demo: Simular inicio de sesión al hacer clic en "Iniciar Sesión"
-  document
-    .querySelectorAll(".profile-menu-guest .profile-item")
-    .forEach((item) => {
-      item.addEventListener("click", (e) => {
-        if (item.textContent.includes("Iniciar")) {
-          e.preventDefault();
-          localStorage.setItem("isLoggedIn", "true");
-          updateMenuState(true);
-          profileMenu?.classList.remove("open");
-          console.log("Demo: Usuario conectado");
-        }
-      });
-    });
+  // document
+  //   .querySelectorAll(".profile-menu-guest .profile-item")
+  //   .forEach((item) => {
+  //     item.addEventListener("click", (e) => {
+  //       if (item.textContent.includes("Iniciar")) {
+  //         e.preventDefault();
+  //         localStorage.setItem("isLoggedIn", "true");
+  //         updateMenuState(true);
+  //         profileMenu?.classList.remove("open");
+  //         console.log("Demo: Usuario conectado");
+  //       }
+  //     });
+  //   });
 
   // Demo: Simular cierre de sesión al hacer clic en "Cerrar Sesión"
-  document.querySelectorAll(".profile-item-logout").forEach((item) => {
-    item.addEventListener("click", (e) => {
-      e.preventDefault();
-      localStorage.setItem("isLoggedIn", "false");
-      updateMenuState(false);
-      profileMenu?.classList.remove("open");
-      console.log("Demo: Sesión cerrada");
-    });
-  });
+  // document.querySelectorAll(".profile-item-logout").forEach((item) => {
+  //   item.addEventListener("click", (e) => {
+  //     e.preventDefault();
+  //     localStorage.setItem("isLoggedIn", "false");
+  //     updateMenuState(false);
+  //     profileMenu?.classList.remove("open");
+  //     console.log("Demo: Sesión cerrada");
+  //   });
+  // });
 })();

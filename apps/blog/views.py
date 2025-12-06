@@ -1,7 +1,12 @@
 from django.shortcuts import (
     get_object_or_404,
+    redirect,
     render
 )
+
+from django.contrib.auth import login
+
+from apps.blog.forms import RegistroForm
 
 from .models import (
     Articulo,
@@ -45,3 +50,17 @@ def detalle_articulo(request, id):
         'comentarios': comentarios,
     }
     return render(request, 'blog/articulo_detail.html', context)
+
+def registro(request):
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            # Loguear al usuario inmediatamente después de registrarse
+            login(request, usuario)
+            return redirect('index') # Redirigir al inicio
+    else:
+        form = RegistroForm()
+    
+    return render(request, 'users/register.html', {'form': form})
+
