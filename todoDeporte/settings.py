@@ -141,3 +141,8 @@ LOGOUT_REDIRECT_URL = 'index'
 
 # URL para redirigir si un usuario no logueado intenta entrar a una zona protegida
 LOGIN_URL = 'login'
+
+
+# CONFIGURACIÓN DE CORREO (Entorno de Desarrollo)
+# Esto hará que los correos aparezcan en la terminal donde ejecutas runserver
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

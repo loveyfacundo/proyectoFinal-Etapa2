@@ -2,7 +2,7 @@ from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
-from .models import Comentario, Articulo
+from .models import Comentario, Articulo, MensajeContacto
 
 class RegistroForm(UserCreationForm):
     class Meta:
@@ -30,5 +30,15 @@ class ArticuloForm(forms.ModelForm):
             'titulo': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Título del artículo'}),
             'contenido': forms.Textarea(attrs={'class': 'form-control', 'rows': 5}),
             'categoria': forms.Select(attrs={'class': 'form-control'}),
+        }
+
+class ContactoForm(forms.ModelForm):
+    class Meta:
+        model = MensajeContacto
+        fields = ['nombre', 'email', 'mensaje']
+        widgets = {
+            'nombre': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Tu nombre'}),
+            'email': forms.EmailInput(attrs={'class': 'form-control', 'placeholder': 'tu@email.com'}),
+            'mensaje': forms.Textarea(attrs={'class': 'form-control', 'rows': 4, 'placeholder': 'Escribe tu mensaje...'}),
         }
 
