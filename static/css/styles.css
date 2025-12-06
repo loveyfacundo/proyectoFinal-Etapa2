@@ -129,8 +129,11 @@ header {
   display: block;
   padding: 0.5rem 0.75rem;
   border-radius: 6px;
-  color: #108600;
+  color: var(--link-color);
   text-decoration: none;
+}
+.dropdown-menu li a:visited {
+  color: var(--link-color);
 }
 .dropdown-menu li a:hover,
 .dropdown-menu li a:focus {
@@ -208,6 +211,9 @@ header {
   color: var(--text-color);
   text-decoration: none;
   transition: background-color 0.2s ease;
+}
+.profile-item span {
+  color: var(--text-color);
 }
 .profile-item:hover {
   background: rgba(16, 134, 0, 0.1);
@@ -421,6 +427,18 @@ footer {
 }
 .footer-copy {
   margin-top: 1rem;
+}
+
+/* Estilos de enlaces genéricos para contenido y formularios */
+.link {
+  color: var(--link-color);
+  text-decoration: none;
+}
+.link:hover {
+  text-decoration: underline;
+}
+.link:visited {
+  color: var(--link-color);
 }
 
 /* Diseño responsive */

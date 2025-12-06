@@ -20,7 +20,8 @@ from apps.blog.forms import (
 from .models import (
     Articulo,
     Categoria,
-    Comentario
+    Comentario,
+    Perfil
 )
 
 from .forms import ContactoForm
@@ -89,9 +90,13 @@ def registro(request):
         form = RegistroForm()
     return render(request, 'users/register.html', {'form': form})
 
-# --- Verifica si es superusuario O si tiene el rol de colaborador en su perfil ---
+# --- Verifica si es superusuario O si tiene el rol de colaborador o administrador ---
 def es_colaborador(user):
-    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.rol == 'colaborador'))
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.es_colaborador_o_superior()))
+
+# --- Verifica si es administrador ---
+def es_administrador(user):
+    return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.es_administrador()))
 
 @user_passes_test(es_colaborador)
 def crear_articulo(request):
@@ -130,7 +135,7 @@ def eliminar_articulo(request, id):
 def editar_comentario(request, id):
     comentario = get_object_or_404(Comentario, id=id)
     es_autor = request.user == comentario.autor
-    es_colaborador = request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.rol == 'colaborador')
+    es_colaborador = request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.es_colaborador_o_superior())
     if not es_autor and not es_colaborador:
         return redirect('detalle_articulo', id=comentario.articulo.id)
 
@@ -154,7 +159,7 @@ def editar_comentario(request, id):
 def eliminar_comentario(request, id):
     comentario = get_object_or_404(Comentario, id=id)
     es_autor = request.user == comentario.autor
-    es_colaborador = request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.rol == 'colaborador')
+    es_colaborador = request.user.is_superuser or (hasattr(request.user, 'perfil') and request.user.perfil.es_colaborador_o_superior())
 
     if not es_autor and not es_colaborador:
         return redirect('detalle_articulo', id=comentario.articulo.id)
@@ -222,4 +227,43 @@ def listar_por_categoria(request, categoria_id):
         'orden_actual': orden,
     }
     return render(request, 'pages/index.html', context)
+
+
+@user_passes_test(es_administrador)
+def gestion_usuarios(request):
+    """Vista para que administradores gestionen roles de usuarios"""
+    usuarios = User.objects.all().select_related('perfil').order_by('username')
+    
+    if request.method == 'POST':
+        usuario_id = request.POST.get('usuario_id')
+        nuevo_rol = request.POST.get('rol')
+        
+        if usuario_id and nuevo_rol:
+            try:
+                usuario = User.objects.get(id=usuario_id)
+                # No permitir cambiar el rol de superusuarios
+                if not usuario.is_superuser:
+                    perfil, created = Perfil.objects.get_or_create(usuario=usuario)
+                    # Administradores solo pueden asignar roles de miembro o colaborador
+                    if nuevo_rol in ['miembro', 'colaborador']:
+                        perfil.rol = nuevo_rol
+                        perfil.save()
+                        messages.success(request, f'Rol de {usuario.username} actualizado a {perfil.get_rol_display()}')
+                    else:
+                        messages.error(request, 'No tienes permisos para asignar ese rol')
+                else:
+                    messages.warning(request, 'No se puede modificar el rol de un superusuario')
+            except User.DoesNotExist:
+                messages.error(request, 'Usuario no encontrado')
+        
+        return redirect('gestion_usuarios')
+    
+    # Solo roles que el administrador puede asignar
+    roles_disponibles = [('miembro', 'Miembro'), ('colaborador', 'Colaborador')]
+    
+    context = {
+        'usuarios': usuarios,
+        'roles_disponibles': roles_disponibles,
+    }
+    return render(request, 'admin/gestion_usuarios.html', context)
 

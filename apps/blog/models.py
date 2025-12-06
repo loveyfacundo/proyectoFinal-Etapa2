@@ -18,7 +18,7 @@ class Perfil(models.Model):
     USUARIO_ROLES = [
         ('miembro', 'Miembro'),
         ('colaborador', 'Colaborador'),
-        # El admin es el superuser de Django
+        ('administrador', 'Administrador'),
     ]
     usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
     rol = models.CharField(max_length=20, choices=USUARIO_ROLES, default='miembro')
@@ -28,6 +28,18 @@ class Perfil(models.Model):
 
     def __str__(self):
         return f"{self.usuario.username} - {self.get_rol_display()}"
+    
+    def es_administrador(self):
+        """Verifica si el usuario tiene rol de administrador"""
+        return self.rol == 'administrador'
+    
+    def es_colaborador_o_superior(self):
+        """Verifica si el usuario es colaborador o administrador"""
+        return self.rol in ['colaborador', 'administrador']
+    
+    def puede_gestionar_usuarios(self):
+        """Solo administradores pueden gestionar usuarios"""
+        return self.rol == 'administrador'
 
 
 class Articulo(models.Model):

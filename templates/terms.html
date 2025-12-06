@@ -1,0 +1,171 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Términos y Condiciones - TodoDeporte</title>
+    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+  </head>
+  <body>
+    <header>
+      <div class="header-bar">
+        <h1 class="header-title">TodoDeporte</h1>
+        <nav class="nav" aria-label="Principal">
+          <ul class="nav-links">
+            <li class="nav-link"><a href="{% url 'index' %}">Inicio</a></li>
+            <li class="nav-link"><a href="{% url 'about' %}">Acerca de</a></li>
+            <li class="nav-link"><a href="{% url 'contact' %}">Contacto</a></li>
+          </ul>
+        </nav>
+        <div class="profile-menu">
+          <button
+            class="theme-toggle"
+            aria-label="Cambiar tema"
+            title="Cambiar tema"
+          >
+            <svg class="icon icon-md theme-icon" aria-hidden="true">
+              <use href="{% static 'img/icons.svg' %}#sun"></use>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main>
+      <section class="terms">
+        <h2 style="margin-bottom: 1rem">Términos y Condiciones</h2>
+        <div
+          class="terms-content"
+          role="region"
+          aria-label="Contenido de términos"
+        >
+          <article class="terms-section">
+            <h3>1. Aceptación</h3>
+            <p>
+              Al acceder y utilizar TodoDeporte, usted acepta estos términos y
+              condiciones. Si no está de acuerdo con alguna parte, por favor no
+              utilice el sitio.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>2. Cuenta y Registro</h3>
+            <p>
+              Para comentar o colaborar, deberá crear una cuenta. Usted es
+              responsable de mantener la confidencialidad de sus credenciales y
+              de toda actividad realizada bajo su cuenta.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>3. Contenido del Usuario</h3>
+            <p>
+              Al publicar artículos o comentarios, usted garantiza que posee los
+              derechos necesarios y que su contenido no infringe leyes ni
+              derechos de terceros.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>4. Moderación</h3>
+            <p>
+              El equipo de TodoDeporte puede editar o eliminar contenido que
+              incumpla estas normas o las políticas del sitio.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>5. Imágenes y Propiedad Intelectual</h3>
+            <p>
+              Las imágenes subidas deben respetar derechos de autor.
+              Recomendamos optimizar y utilizar formatos apropiados. En
+              producción se puede emplear un servicio de almacenamiento externo.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>6. Libre Expresión y Conducta</h3>
+            <p>
+              Fomentamos la libre expresión siempre que se ejerza con respeto.
+              No se permite contenido que incluya insultos, discursos de odio,
+              acoso, amenazas, difamación, o cualquier forma de violencia
+              simbólica.
+            </p>
+            <p>
+              Las críticas son bienvenidas; los ataques personales no. El equipo
+              podrá moderar, ocultar o eliminar publicaciones o comentarios que
+              infrinjan estas normas.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>7. Reportes y Sanciones</h3>
+            <p>
+              Si detecta contenido ofensivo o fuera de nuestras políticas, por
+              favor repórtelo mediante la sección de
+              <a class="link" href="{% url 'contact' %}">Contacto</a>. Las
+              sanciones pueden incluir advertencias, restricciones temporales o
+              suspensión de la cuenta.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>8. Privacidad</h3>
+            <p>
+              Tratamos sus datos conforme a la legislación vigente. El uso del
+              sitio implica la aceptación de nuestras prácticas de privacidad.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>9. Cambios en los Términos</h3>
+            <p>
+              Estos términos pueden actualizarse. El uso continuado del sitio
+              tras cambios implica su aceptación.
+            </p>
+          </article>
+
+          <article class="terms-section">
+            <h3>10. Contacto</h3>
+            <p>
+              Para consultas sobre estos términos, utilice la sección
+              <a class="link" href="{% url 'contact' %}">Contacto</a>.
+            </p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <p class="footer-copy">&copy; 2025 TodoDeporte</p>
+    </footer>
+
+    <script src="{% static 'js/main.js' %}"></script>
+    <style>
+      .terms {
+        max-width: 800px;
+        margin: 2rem auto;
+        background: var(--card-bg);
+        padding: 1.5rem;
+        border-radius: 8px;
+        box-shadow: 0 2px 4px var(--card-shadow);
+      }
+      .terms-content {
+        max-height: 60vh;
+        overflow-y: auto;
+        padding-right: 0.5rem;
+      }
+      .terms-section {
+        margin-bottom: 1rem;
+      }
+      .terms-section h3 {
+        color: var(--title-color);
+        margin-bottom: 0.25rem;
+      }
+      .terms-section p {
+        color: var(--text-color);
+      }
+    </style>
+  </body>
+</html>

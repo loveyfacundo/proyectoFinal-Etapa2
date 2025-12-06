@@ -14,7 +14,7 @@ def crear_perfil_usuario(sender, instance, created, **kwargs):
             # Rol predeterminado
             rol='miembro'
         )
-        print(f"✓ Perfil creado automáticamente para {instance.username}")
+        print(f"Perfil creado automaticamente para {instance.username}")
 
 
 # Guarda el perfil cuando se actualiza el usuario
@@ -23,4 +23,4 @@ def guardar_perfil_usuario(sender, instance, **kwargs):
     
     if hasattr(instance, 'perfil'):
         instance.perfil.save()
-        print(f"✓ Perfil actualizado para {instance.username}")
+        print(f"Perfil actualizado para {instance.username}")
