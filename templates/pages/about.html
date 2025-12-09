@@ -1,10 +1,78 @@
 {% extends 'base.html' %}
+{% load static %}
 
-{% block title %}Nosotros - TodoDeporte{% endblock %}
+{% block title %}Acerca de - TodoDeporte{% endblock %}
 
 {% block content %}
-    <section style="background: var(--card-bg); padding: 2rem; border-radius: 8px;">
-        <h2>Acerca de TodoDeporte</h2>
-        <p>Somos una comunidad apasionada por el deporte...</p>
+<div class="about-container">
+    
+    <!-- Hero Section -->
+    <section class="about-hero">
+        <h1>🏆 TodoDeporte</h1>
+        <p>
+            Acercando las mejores noticias deportivas a todos los argentinos desde 2025
+        </p>
+    </section>
+
+    {% if acerca_de %}
+        <section class="mission-section">
+            <div class="mission-content">
+                <h2>Nuestra Misión</h2>
+                {# linebreaks convierte saltos de línea en <br> y párrafos en <p> #}
+                {{ acerca_de.contenido|linebreaks }}
+            </div>
+            <div class="mission-image">
+                ⚽
+            </div>
         </section>
+
+        <!-- Valores -->
+        <section class="values-section">
+            <h2>Nuestros Valores</h2>
+            <div class="values-grid">
+                <div class="value-card">
+                    <div class="value-icon">🎯</div>
+                    <h3>Precisión</h3>
+                    <p>Verificamos cada noticia para brindarte información confiable y de calidad.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">⚡</div>
+                    <h3>Rapidez</h3>
+                    <p>Cobertura en tiempo real de los eventos deportivos más importantes.</p>
+                </div>
+                <div class="value-card">
+                    <div class="value-icon">❤️</div>
+                    <h3>Pasión</h3>
+                    <p>Amamos el deporte tanto como vos. Esa pasión se refleja en cada artículo.</p>
+                </div>
+            </div>
+        </section>
+
+        {% if integrantes_html %}
+            <section class="team-section">
+                <h2>Conocé al Equipo</h2>
+                <div class="team-list">
+                    {{ integrantes_html|safe|linebreaks }}
+                </div>
+            </section>
+        {% endif %}
+
+    {% else %}
+        {# Mensaje cuando no hay contenido en la BD #}
+        <div class="no-content-alert">
+            <h3>⚠️ No hay información disponible</h3>
+            <p>El contenido de "Acerca de" aún no ha sido configurado.</p>
+            <p>Por favor, <a href="/admin/blog/acercade/">edita el contenido desde el admin de Django</a>.</p>
+        </div>
+    {% endif %}
+
+    <!-- CTA (siempre visible) -->
+    <section class="cta-section">
+        <h2>¿Tenés algo que contarnos?</h2>
+        <p>Nos encantaría escucharte. Envianos tus comentarios, sugerencias o colaboraciones.</p>
+        <a href="{% url 'contact' %}" class="cta-button">Contactanos</a>
+    </section>
+
+</div>
+
 {% endblock %}
