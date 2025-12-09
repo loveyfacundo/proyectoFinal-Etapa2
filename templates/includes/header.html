@@ -78,7 +78,12 @@
                                 <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#plus"></use></svg> <span>Crear Artículo</span>
                             </a>
                         {% endif %}
-                        
+
+                        {% if user.is_superuser or user.perfil.rol == 'administrador' %}
+                            <a href="{% url 'gestion_usuarios' %}" class="profile-item">
+                                <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#plus"></use></svg> <span>Administrar</span>
+                            </a>
+                        {% endif %}
                         <a href="#" class="profile-item">
                             <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
                             <span>Mi Perfil</span>
