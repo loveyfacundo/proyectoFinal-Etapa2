@@ -25,6 +25,8 @@ from .models import (
 )
 
 from .forms import ContactoForm
+from .models import AcercaDe
+
 
 def index(request):
     orden = request.GET.get('orden', 'reciente')
@@ -53,7 +55,45 @@ def index(request):
 
 
 def about(request):
-    return render(request, 'pages/about.html')
+    try:
+        acerca_de = AcercaDe.objects.first()
+        
+        # Si existe contenido de integrantes, procesarlo
+        if acerca_de and acerca_de.integrantes:
+            # Procesar cada línea para destacar el nombre
+            lineas_procesadas = []
+            for linea in acerca_de.integrantes.split('\n'):
+                linea = linea.strip()
+                if linea and '-' in linea:
+                    # Formato: "• Nombre Apellido - Cargo"
+                    # Separar nombre y cargo
+                    partes = linea.split(' - ', 1)
+                    if len(partes) == 2:
+                        nombre = partes[0].replace('•', '').strip()
+                        cargo = partes[1].strip()
+                        # Crear HTML con nombre en negrita
+                        linea_formateada = f"<strong>{nombre}</strong> - {cargo}"
+                        lineas_procesadas.append(linea_formateada)
+                    else:
+                        lineas_procesadas.append(linea)
+                elif linea:
+                    lineas_procesadas.append(linea)
+            
+            # Unir las líneas procesadas
+            integrantes_html = '\n'.join(lineas_procesadas)
+        else:
+            integrantes_html = None
+            
+    except:
+        acerca_de = None
+        integrantes_html = None
+    
+    context = {
+        'acerca_de': acerca_de,
+        'integrantes_html': integrantes_html
+    }
+    return render(request, 'pages/about.html', context)
+
 
 def detalle_articulo(request, id):
     articulo = get_object_or_404(Articulo, id=id)
@@ -79,6 +119,7 @@ def detalle_articulo(request, id):
     }
     return render(request, 'blog/articulo_detail.html', context)
 
+
 def registro(request):
     if request.method == 'POST':
         form = RegistroForm(request.POST)
@@ -90,13 +131,16 @@ def registro(request):
         form = RegistroForm()
     return render(request, 'users/register.html', {'form': form})
 
+
 # --- Verifica si es superusuario O si tiene el rol de colaborador o administrador ---
 def es_colaborador(user):
     return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.es_colaborador_o_superior()))
 
+
 # --- Verifica si es administrador ---
 def es_administrador(user):
     return user.is_authenticated and (user.is_superuser or (hasattr(user, 'perfil') and user.perfil.es_administrador()))
+
 
 @user_passes_test(es_colaborador)
 def crear_articulo(request):
@@ -111,6 +155,7 @@ def crear_articulo(request):
         form = ArticuloForm()
     return render(request, 'blog/articulo_form.html', {'form': form, 'titulo': 'Crear Nuevo Artículo'})
 
+
 @user_passes_test(es_colaborador)
 def editar_articulo(request, id):
     articulo = get_object_or_404(Articulo, id=id)
@@ -123,6 +168,7 @@ def editar_articulo(request, id):
         form = ArticuloForm(instance=articulo)
     return render(request, 'blog/articulo_form.html', {'form': form, 'titulo': 'Editar Artículo'})
 
+
 @user_passes_test(es_colaborador)
 def eliminar_articulo(request, id):
     articulo = get_object_or_404(Articulo, id=id)
@@ -130,6 +176,7 @@ def eliminar_articulo(request, id):
         articulo.delete()
         return redirect('index')
     return render(request, 'blog/articulo_confirm_delete.html', {'articulo': articulo})
+
 
 @login_required
 def editar_comentario(request, id):
@@ -155,6 +202,7 @@ def editar_comentario(request, id):
         'titulo_pagina': titulo 
     })
 
+
 @login_required
 def eliminar_comentario(request, id):
     comentario = get_object_or_404(Comentario, id=id)
@@ -170,6 +218,7 @@ def eliminar_comentario(request, id):
         return redirect('detalle_articulo', id=articulo_id)
     
     return render(request, 'blog/comentario_confirm_delete.html', {'comentario': comentario})
+
 
 def contact(request):
     if request.method == 'POST':
@@ -206,6 +255,7 @@ def contact(request):
         form = ContactoForm()
 
     return render(request, 'pages/contact.html', {'form': form})
+
 
 def listar_por_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
@@ -265,5 +315,4 @@ def gestion_usuarios(request):
         'usuarios': usuarios,
         'roles_disponibles': roles_disponibles,
     }
-    return render(request, 'admin/gestion_usuarios.html', context)
-
+    return render(request, 'users/gestion_usuarios.html', context)

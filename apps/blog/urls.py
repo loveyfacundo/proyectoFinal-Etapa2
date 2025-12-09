@@ -22,7 +22,7 @@ urlpatterns = [
     path('categoria/<int:categoria_id>/', views.listar_por_categoria, name='listar_por_categoria'),
 
     # GESTIÓN DE USUARIOS (ADMIN)
-    path('admin/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
+    path('gestion/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
 
     # RUTAS DE AUTENTICACIÓN
     path('registro/', views.registro, name='registro'),
