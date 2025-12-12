@@ -1,0 +1,20 @@
+{% extends 'blog/base.html' %}
+
+{% block title %}Inicio{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Últimos artículos</h1>
+
+{% if articulos %}
+    <div class="list-group">
+    {% for articulo in articulos %}
+        <a href="{% url 'detalle_articulo' articulo.id %}" class="list-group-item list-group-item-action">
+            <h5>{{ articulo.titulo }}</h5>
+            <p>{{ articulo.contenido|truncatewords:20 }}</p>
+        </a>
+    {% endfor %}
+    </div>
+{% else %}
+    <p>No hay artículos publicados todavía.</p>
+{% endif %}
+{% endblock %}

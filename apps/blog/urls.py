@@ -24,9 +24,4 @@ urlpatterns = [
     # GESTIÓN DE USUARIOS (ADMIN)
     path('gestion/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
 
-    # RUTAS DE AUTENTICACIÓN
-    path('registro/', views.registro, name='registro'),
-    path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'),
 ]
-
