@@ -24,4 +24,10 @@ urlpatterns = [
     # GESTIÓN DE USUARIOS (ADMIN)
     path('gestion/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
 
+    # PERFIL DE USUARIO (las rutas específicas ANTES de las dinámicas)
+    path('perfil/', views.perfil_usuario, name='perfil_usuario'),
+    path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
+    path('perfil/cambiar-password/', views.cambiar_password, name='cambiar_password'),
+    path('perfil/<str:username>/', views.perfil_usuario, name='perfil_usuario_publico'),
+
 ]

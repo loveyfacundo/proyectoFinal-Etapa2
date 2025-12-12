@@ -28,15 +28,13 @@
         line-height: 1.2;
         color: var(--title-color);
         margin-bottom: 1.5rem;
-        /* word-wrap asegura que títulos larguísimos no rompan el ancho */
-        word-wrap: break-word; 
+        word-wrap: break-word;
     }
-    /* Contenedor flexible para Autor vs Botones */
     .articulo-meta-row {
         display: flex;
         justify-content: space-between;
         align-items: center;
-        flex-wrap: wrap; /* Importante para móviles */
+        flex-wrap: wrap;
         gap: 1rem;
         font-size: 0.95rem;
         color: var(--footer-text);
@@ -45,6 +43,16 @@
         display: flex;
         align-items: center;
         gap: 0.5rem;
+    }
+    .articulo-author a {
+        color: var(--text-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: color 0.2s;
+    }
+    .articulo-author a:hover {
+        color: var(--header-bg);
+        text-decoration: underline;
     }
     .articulo-actions {
         display: flex;
@@ -64,7 +72,6 @@
     .btn-edit { background-color: #ffc107; color: #212529; }
     .btn-delete { background-color: #dc3545; color: #fff; }
     
-    /* Imagen principal */
     .articulo-figure {
         margin: 0 0 2rem 0;
         border-radius: 12px;
@@ -110,7 +117,7 @@
                     </svg>
                 </div>
                 <div>
-                    Por <strong>{{ articulo.autor.first_name|default:articulo.autor.username }}</strong>
+                    Por <a href="{% url 'perfil_usuario_publico' articulo.autor.username %}">{{ articulo.autor.first_name|default:articulo.autor.username }}</a>
                     <span style="margin: 0 5px;">•</span>
                     <time>{{ articulo.fecha_creacion|date:"d M Y" }}</time>
                 </div>
@@ -177,7 +184,9 @@
                                     {{ c.autor.username|slice:":1"|upper }}
                                 </div>
                                 <div>
-                                    <strong style="display: block; line-height: 1;">{{ c.autor.username }}</strong>
+                                    <a href="{% url 'perfil_usuario_publico' c.autor.username %}" style="display: block; line-height: 1; font-weight: 600; color: var(--text-color); text-decoration: none;">
+                                        {{ c.autor.username }}
+                                    </a>
                                     <span style="font-size: 0.8rem; color: var(--footer-text);">
                                         {{ c.fecha_creacion|date:"d M Y, H:i" }}
                                     </span>

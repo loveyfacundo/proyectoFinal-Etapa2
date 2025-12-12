@@ -1,22 +1,140 @@
-from django.shortcuts import get_object_or_404, redirect, render
+from django.shortcuts import (
+    get_object_or_404,
+    redirect,
+    render
+)
+
+from django.core.mail import send_mail
+from django.conf import settings
+from django.contrib import messages
+from django.contrib.auth import login
 from django.contrib.auth.models import User
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Count
 
-from .models import Articulo, Comentario, Perfil, Categoria
-from .forms import ArticuloForm, ComentarioForm
+from apps.blog.forms import (
+    ArticuloForm,
+    RegistroForm,
+    ComentarioForm
+)
 
-# --- VISTA INDEX (NECESARIA PARA QUE NO HAYA ERROR) ---
+from .models import (
+    Articulo,
+    Categoria,
+    Comentario,
+    Perfil
+)
+
+from .forms import ContactoForm
+from .models import AcercaDe
+
+
 def index(request):
-    articulos = Articulo.objects.all().order_by('-id')
-    categorias = Categoria.objects.all()
-    return render(
-        request,
-        'blog/index.html',
-        {'articulos': articulos, 'categorias': categorias}
-    )
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
 
-# --- Funciones para verificar permisos ---
+    articulos_destacados = Articulo.objects.filter(destacado=True).order_by('-fecha_creacion')[:3]
+    
+    if orden == 'reciente':
+        ultimas_noticias = Articulo.objects.order_by(campo_orden)[:6]
+    else:
+        ultimas_noticias = Articulo.objects.order_by(campo_orden)
+
+    context = {
+        'destacados': articulos_destacados,
+        'noticias': ultimas_noticias,
+        'orden_actual': orden, # Pasamos esto para que el select recuerde la opción
+    }
+    return render(request, 'pages/index.html', context)
+
+
+def about(request):
+    try:
+        acerca_de = AcercaDe.objects.first()
+        
+        # Si existe contenido de integrantes, procesarlo
+        if acerca_de and acerca_de.integrantes:
+            # Procesar cada línea para destacar el nombre
+            lineas_procesadas = []
+            for linea in acerca_de.integrantes.split('\n'):
+                linea = linea.strip()
+                if linea and '-' in linea:
+                    # Formato: "• Nombre Apellido - Cargo"
+                    # Separar nombre y cargo
+                    partes = linea.split(' - ', 1)
+                    if len(partes) == 2:
+                        nombre = partes[0].replace('•', '').strip()
+                        cargo = partes[1].strip()
+                        # Crear HTML con nombre en negrita
+                        linea_formateada = f"<strong>{nombre}</strong> - {cargo}"
+                        lineas_procesadas.append(linea_formateada)
+                    else:
+                        lineas_procesadas.append(linea)
+                elif linea:
+                    lineas_procesadas.append(linea)
+            
+            # Unir las líneas procesadas
+            integrantes_html = '\n'.join(lineas_procesadas)
+        else:
+            integrantes_html = None
+            
+    except:
+        acerca_de = None
+        integrantes_html = None
+    
+    context = {
+        'acerca_de': acerca_de,
+        'integrantes_html': integrantes_html
+    }
+    return render(request, 'pages/about.html', context)
+
+
+def detalle_articulo(request, id):
+    articulo = get_object_or_404(Articulo, id=id)
+    comentarios = articulo.comentarios.all().order_by('-fecha_creacion')
+    form = ComentarioForm()
+
+    if request.method == 'POST':
+        if request.user.is_authenticated:
+            form = ComentarioForm(request.POST)
+            if form.is_valid():
+                comentario = form.save(commit=False)
+                comentario.articulo = articulo
+                comentario.autor = request.user
+                comentario.save()
+                return redirect('detalle_articulo', id=id)
+        else:
+            return redirect('login')
+        
+    context = {
+        'articulo': articulo,
+        'comentarios': comentarios,
+        'form': form,
+    }
+    return render(request, 'blog/articulo_detail.html', context)
+
+
+def registro(request):
+    if request.method == 'POST':
+        form = RegistroForm(request.POST)
+        if form.is_valid():
+            usuario = form.save()
+            login(request, usuario)
+            return redirect('index') # Redirigir al inicio
+    else:
+        form = RegistroForm()
+    return render(request, 'users/register.html', {'form': form})
+
+
+# --- Verifica si es superusuario O si tiene el rol de colaborador o administrador ---
 def es_colaborador(user):
     return user.is_authenticated and (
         user.is_superuser or (
@@ -147,13 +265,25 @@ def contact(request):
     return render(request, 'blog/contact.html')
 def listar_por_categoria(request, categoria_id):
     categoria = get_object_or_404(Categoria, id=categoria_id)
-    articulos = Articulo.objects.filter(categoria=categoria).order_by('-id')
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
+    
+    noticias = Articulo.objects.filter(categoria=categoria).order_by(campo_orden)
+    
+    context = {
+        'noticias': noticias,
+        'categoria_seleccionada': categoria,
+        'orden_actual': orden,
+    }
+    return render(request, 'pages/index.html', context)
 
-    return render(request, 'blog/listar_por_categoria.html', {
-        'categoria': categoria,
-        'articulos': articulos
-    })
-from django.contrib.auth.models import User
 
 @user_passes_test(es_administrador)
 def gestion_usuarios(request):
@@ -162,5 +292,6 @@ def gestion_usuarios(request):
 
     return render(request, 'blog/gestion_usuarios.html', {
         'usuarios': usuarios,
-        'perfiles': perfiles,
-    })
+        'roles_disponibles': roles_disponibles,
+    }
+    return render(request, 'users/gestion_usuarios.html', context)
