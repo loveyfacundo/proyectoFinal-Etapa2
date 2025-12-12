@@ -9,17 +9,15 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
+    <!-- Esto es tu prueba roja, podés borrarlo después -->
     <p style="color:red; text-align:center;">Todo deportes</p>
-{# Incluimos el Header común #}
+
     {% include 'includes/header.html' %}
 
-    {# Aquí se inyectará el contenido específico de cada página #}
     <main>
-        {% block content %}
-        {% endblock %}
+        {% block content %}{% endblock %}
     </main>
 
-    {# Incluimos el Footer común #}
     {% include 'includes/footer.html' %}
 
     <script src="{% static 'js/main.js' %}"></script>
