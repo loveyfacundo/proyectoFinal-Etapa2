@@ -46,7 +46,7 @@
                 </svg>
             </button>
 
-            {# --- MODIFICACIÓN AQUÍ: Botón de Perfil con Texto --- #}
+            {# Botón de Perfil con Texto #}
             <button class="profile-toggle" aria-label="Menú de usuario" aria-haspopup="true" aria-expanded="false" 
                     style="display: flex; align-items: center; gap: 10px; text-decoration: none; color: white;">
                 
@@ -58,7 +58,7 @@
 
                 <span style="font-weight: 500; font-size: 0.95rem; display:block; @media (min-width: 768px) { display: inline; }">
                     {% if user.is_authenticated %}
-                        {{ user.first_name }}
+                        {{ user.first_name|default:user.username }}
                     {% else %}
                         Iniciar Sesión
                     {% endif %}
@@ -73,6 +73,12 @@
                 
                 {% if user.is_authenticated %}
                     <div class="profile-menu-logged">
+                        {# ENLACE AL PERFIL - MODIFICADO #}
+                        <a href="{% url 'perfil_usuario' %}" class="profile-item">
+                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
+                            <span>Mi Perfil</span>
+                        </a>
+
                         {% if user.is_superuser or user.perfil.rol == 'colaborador' %}
                             <a href="{% url 'crear_articulo' %}" class="profile-item">
                                 <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#plus"></use></svg> <span>Crear Artículo</span>
@@ -84,10 +90,6 @@
                                 <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#plus"></use></svg> <span>Administrar</span>
                             </a>
                         {% endif %}
-                        <a href="#" class="profile-item">
-                            <svg class="icon icon-sm" aria-hidden="true"><use href="{% static 'img/icons.svg' %}#user"></use></svg>
-                            <span>Mi Perfil</span>
-                        </a>
                         
                         <form action="{% url 'logout' %}" method="post" style="display: inline;">
                             {% csrf_token %}

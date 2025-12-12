@@ -1,0 +1,571 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil de {{ usuario_perfil.username }} - TodoDeporte{% endblock %}
+
+{% block content %}
+<div class="perfil-container">
+    
+    <!-- Hero del Perfil -->
+    <div class="perfil-hero">
+        <div class="perfil-avatar-grande">
+            {{ usuario_perfil.username|slice:":1"|upper }}
+        </div>
+        <div class="perfil-info-principal">
+            <h1>{{ usuario_perfil.first_name }} {{ usuario_perfil.last_name }}</h1>
+            <p class="perfil-username">@{{ usuario_perfil.username }}</p>
+            
+            <div class="perfil-rol">
+                {% if usuario_perfil.is_superuser %}
+                    <span class="badge badge-superuser">👑 Superusuario</span>
+                {% elif usuario_perfil.perfil.rol == 'administrador' %}
+                    <span class="badge badge-admin">🔐 Administrador</span>
+                {% elif usuario_perfil.perfil.rol == 'colaborador' %}
+                    <span class="badge badge-colaborador">✏️ Colaborador</span>
+                {% else %}
+                    <span class="badge badge-miembro">👤 Miembro</span>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Mensajes -->
+    {% if messages %}
+        <div class="msg-container">
+            {% for message in messages %}
+                <div class="msg {% if 'success' in message.tags %}msg-success{% elif 'error' in message.tags %}msg-error{% endif %}">
+                    {{ message }}
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
+    <div class="perfil-grid">
+        
+        <!-- Columna Izquierda: Información -->
+        <div class="perfil-seccion">
+            <div class="card">
+                <h2>📋 Información Personal</h2>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <span class="info-label">Nombre Completo</span>
+                        <span class="info-value">
+                            {% if usuario_perfil.first_name and usuario_perfil.last_name %}
+                                {{ usuario_perfil.first_name }} {{ usuario_perfil.last_name }}
+                            {% else %}
+                                <em style="color: var(--footer-text);">No especificado</em>
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Usuario</span>
+                        <span class="info-value">{{ usuario_perfil.username }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Correo Electrónico</span>
+                        <span class="info-value">{{ usuario_perfil.email }}</span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Rol</span>
+                        <span class="info-value">
+                            {% if usuario_perfil.is_superuser %}
+                                Superusuario
+                            {% else %}
+                                {{ usuario_perfil.perfil.get_rol_display }}
+                            {% endif %}
+                        </span>
+                    </div>
+                    <div class="info-item">
+                        <span class="info-label">Miembro desde</span>
+                        <span class="info-value">{{ usuario_perfil.date_joined|date:"d/m/Y" }}</span>
+                    </div>
+                </div>
+
+                {% if es_propio %}
+                    <div class="card-actions">
+                        <a href="{% url 'editar_perfil' %}" class="btn btn-primary">
+                            ✏️ Editar Perfil
+                        </a>
+                        <a href="{% url 'cambiar_password' %}" class="btn btn-secondary">
+                            🔒 Cambiar Contraseña
+                        </a>
+                    </div>
+                {% endif %}
+            </div>
+
+            <!-- Estadísticas -->
+            <div class="card">
+                <h2>📊 Estadísticas</h2>
+                <div class="stats-grid">
+                    <div class="stat-item">
+                        <div class="stat-icon">📝</div>
+                        <div class="stat-info">
+                            <span class="stat-number">{{ total_articulos }}</span>
+                            <span class="stat-label">Artículo{{ total_articulos|pluralize }}</span>
+                        </div>
+                    </div>
+                    <div class="stat-item">
+                        <div class="stat-icon">💬</div>
+                        <div class="stat-info">
+                            <span class="stat-number">{{ total_comentarios }}</span>
+                            <span class="stat-label">Comentario{{ total_comentarios|pluralize }}</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Columna Derecha: Artículos -->
+        <div class="perfil-seccion">
+            {% if articulos %}
+                <div class="card">
+                    <h2>📰 Artículos Publicados</h2>
+                    <div class="articulos-lista">
+                        {% for articulo in articulos %}
+                            <div class="articulo-item">
+                                {% if articulo.imagen_destacada %}
+                                    <div class="articulo-thumb">
+                                        <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}">
+                                    </div>
+                                {% else %}
+                                    <div class="articulo-thumb articulo-thumb-placeholder">
+                                        📰
+                                    </div>
+                                {% endif %}
+                                <div class="articulo-info">
+                                    <a href="{% url 'detalle_articulo' articulo.id %}" class="articulo-titulo">
+                                        {{ articulo.titulo }}
+                                    </a>
+                                    <div class="articulo-meta">
+                                        <span class="articulo-categoria">{{ articulo.categoria.nombre }}</span>
+                                        <span>•</span>
+                                        <span>{{ articulo.fecha_creacion|date:"d/m/Y" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+
+                    {% if total_articulos > 10 %}
+                        <p style="text-align: center; margin-top: 1rem; color: var(--footer-text); font-size: 0.9rem;">
+                            Mostrando los 10 artículos más recientes de {{ total_articulos }} totales
+                        </p>
+                    {% endif %}
+                </div>
+            {% else %}
+                {% if usuario_perfil.perfil.es_colaborador_o_superior %}
+                    <div class="card card-empty">
+                        <div class="empty-state">
+                            <div class="empty-icon">📝</div>
+                            <h3>No hay artículos aún</h3>
+                            <p>
+                                {% if es_propio %}
+                                    ¡Comienza a escribir tu primer artículo!
+                                {% else %}
+                                    Este usuario aún no ha publicado artículos.
+                                {% endif %}
+                            </p>
+                            {% if es_propio %}
+                                <a href="{% url 'crear_articulo' %}" class="btn btn-primary" style="margin-top: 1rem;">
+                                    Crear Artículo
+                                </a>
+                            {% endif %}
+                        </div>
+                    </div>
+                {% endif %}
+            {% endif %}
+        </div>
+    </div>
+
+</div>
+
+<style>
+    .perfil-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+
+    /* Hero del Perfil */
+    .perfil-hero {
+        background: linear-gradient(135deg, var(--header-bg) 0%, #0a5c00 100%);
+        border-radius: 16px;
+        padding: 3rem 2rem;
+        margin-bottom: 2rem;
+        display: flex;
+        align-items: center;
+        gap: 2rem;
+        color: white;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+    }
+
+    .perfil-avatar-grande {
+        width: 120px;
+        height: 120px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 3rem;
+        font-weight: bold;
+        border: 4px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .perfil-info-principal h1 {
+        font-size: 2.5rem;
+        margin: 0 0 0.5rem 0;
+        font-weight: 700;
+    }
+
+    .perfil-username {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        margin: 0 0 1rem 0;
+    }
+
+    .perfil-rol {
+        margin-top: 1rem;
+    }
+
+    .badge {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.95rem;
+        font-weight: 600;
+    }
+
+    .badge-superuser {
+        background: #ffd700;
+        color: #000;
+    }
+
+    .badge-admin {
+        background: #ff6b6b;
+        color: white;
+    }
+
+    .badge-colaborador {
+        background: #4ecdc4;
+        color: white;
+    }
+
+    .badge-miembro {
+        background: rgba(255, 255, 255, 0.25);
+        color: white;
+    }
+
+    /* Grid del Perfil */
+    .perfil-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 2rem;
+    }
+
+    /* Cards */
+    .card {
+        background: var(--card-bg);
+        border-radius: 12px;
+        padding: 2rem;
+        box-shadow: 0 4px 15px var(--card-shadow);
+        margin-bottom: 2rem;
+    }
+
+    .card h2 {
+        font-size: 1.5rem;
+        color: var(--title-color);
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--border-color);
+    }
+
+    /* Información Personal */
+    .info-grid {
+        display: grid;
+        gap: 1.25rem;
+    }
+
+    .info-item {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .info-label {
+        font-size: 0.85rem;
+        color: var(--footer-text);
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .info-value {
+        font-size: 1.1rem;
+        color: var(--text-color);
+        font-weight: 500;
+    }
+
+    /* Acciones de la Card */
+    .card-actions {
+        margin-top: 2rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid var(--border-color);
+        display: flex;
+        gap: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .btn {
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 0.95rem;
+        transition: all 0.2s;
+        display: inline-block;
+        text-align: center;
+    }
+
+    .btn-primary {
+        background: var(--header-bg);
+        color: white;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+    }
+
+    .btn-primary:hover {
+        background: #0a5c00;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+    }
+
+    .btn-secondary {
+        background: transparent;
+        color: var(--text-color);
+        border: 2px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+        border-color: var(--header-bg);
+        color: var(--header-bg);
+    }
+
+    /* Estadísticas */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+
+    .stat-item {
+        display: flex;
+        align-items: center;
+        gap: 1rem;
+        padding: 1.5rem;
+        background: var(--bg-color);
+        border-radius: 12px;
+        border: 2px solid var(--border-color);
+        transition: all 0.3s;
+    }
+
+    .stat-item:hover {
+        border-color: var(--header-bg);
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 134, 0, 0.1);
+    }
+
+    .stat-icon {
+        font-size: 2.5rem;
+    }
+
+    .stat-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .stat-number {
+        font-size: 2rem;
+        font-weight: 700;
+        color: var(--title-color);
+        line-height: 1;
+    }
+
+    .stat-label {
+        font-size: 0.9rem;
+        color: var(--footer-text);
+        margin-top: 0.25rem;
+    }
+
+    /* Lista de Artículos */
+    .articulos-lista {
+        display: grid;
+        gap: 1rem;
+    }
+
+    .articulo-item {
+        display: flex;
+        gap: 1rem;
+        padding: 1rem;
+        background: var(--bg-color);
+        border-radius: 8px;
+        transition: all 0.2s;
+        border: 1px solid var(--border-color);
+    }
+
+    .articulo-item:hover {
+        transform: translateX(4px);
+        border-color: var(--header-bg);
+        box-shadow: 0 2px 8px rgba(16, 134, 0, 0.1);
+    }
+
+    .articulo-thumb {
+        width: 80px;
+        height: 80px;
+        border-radius: 8px;
+        overflow: hidden;
+        flex-shrink: 0;
+    }
+
+    .articulo-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .articulo-thumb-placeholder {
+        background: var(--border-color);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+    }
+
+    .articulo-info {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+    }
+
+    .articulo-titulo {
+        color: var(--title-color);
+        font-weight: 600;
+        font-size: 1.05rem;
+        text-decoration: none;
+        margin-bottom: 0.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .articulo-titulo:hover {
+        color: var(--header-bg);
+        text-decoration: underline;
+    }
+
+    .articulo-meta {
+        font-size: 0.85rem;
+        color: var(--footer-text);
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .articulo-categoria {
+        background: var(--header-bg);
+        color: white;
+        padding: 0.2rem 0.6rem;
+        border-radius: 12px;
+        font-size: 0.75rem;
+        font-weight: 600;
+    }
+
+    /* Estado Vacío */
+    .card-empty {
+        text-align: center;
+    }
+
+    .empty-state {
+        padding: 2rem 1rem;
+    }
+
+    .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state h3 {
+        color: var(--title-color);
+        margin-bottom: 0.5rem;
+    }
+
+    .empty-state p {
+        color: var(--footer-text);
+    }
+
+    /* Mensajes */
+    .msg-container {
+        margin-bottom: 2rem;
+    }
+
+    .msg {
+        padding: 1rem 1.5rem;
+        border-radius: 8px;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        animation: slideIn 0.3s ease;
+    }
+
+    .msg-success {
+        background: #d1e7dd;
+        color: #0f5132;
+        border: 1px solid #badbcc;
+    }
+
+    .msg-error {
+        background: #f8d7da;
+        color: #842029;
+        border: 1px solid #f5c2c7;
+    }
+
+    @keyframes slideIn {
+        from {
+            opacity: 0;
+            transform: translateY(-10px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+        .perfil-hero {
+            flex-direction: column;
+            text-align: center;
+        }
+
+        .perfil-info-principal h1 {
+            font-size: 2rem;
+        }
+
+        .perfil-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .card-actions {
+            flex-direction: column;
+        }
+
+        .btn {
+            width: 100%;
+        }
+    }
+</style>
+{% endblock %}

@@ -1,31 +1,29 @@
-from django.shortcuts import (
-    get_object_or_404,
-    redirect,
-    render
-)
-
+from django.shortcuts import get_object_or_404, redirect, render
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib import messages
-from django.contrib.auth import login
+from django.contrib.auth import login, update_session_auth_hash
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required, user_passes_test
+from django.db.models import Count
 
 from apps.blog.forms import (
     ArticuloForm,
     RegistroForm,
-    ComentarioForm
+    ComentarioForm,
+    EditarPerfilForm,
+    CambiarPasswordForm
 )
 
 from .models import (
     Articulo,
     Categoria,
     Comentario,
-    Perfil
+    Perfil,
+    AcercaDe
 )
 
 from .forms import ContactoForm
-from .models import AcercaDe
 
 
 def index(request):
@@ -316,3 +314,77 @@ def gestion_usuarios(request):
         'roles_disponibles': roles_disponibles,
     }
     return render(request, 'users/gestion_usuarios.html', context)
+
+
+@login_required
+def perfil_usuario(request, username=None):
+    """Vista para mostrar el perfil de un usuario"""
+    if username:
+        # Ver perfil de otro usuario
+        usuario = get_object_or_404(User, username=username)
+        es_propio = request.user == usuario
+    else:
+        # Ver perfil propio
+        usuario = request.user
+        es_propio = True
+    
+    # Obtener estadísticas
+    total_articulos = usuario.articulos.count() if hasattr(usuario, 'articulos') else 0
+    total_comentarios = usuario.comentarios.count() if hasattr(usuario, 'comentarios') else 0
+    
+    # Obtener artículos del usuario (si es colaborador o superior)
+    articulos = []
+    if hasattr(usuario, 'perfil') and usuario.perfil.es_colaborador_o_superior():
+        articulos = usuario.articulos.order_by('-fecha_creacion')[:10]
+    
+    context = {
+        'usuario_perfil': usuario,
+        'es_propio': es_propio,
+        'total_articulos': total_articulos,
+        'total_comentarios': total_comentarios,
+        'articulos': articulos,
+    }
+    
+    return render(request, 'users/perfil.html', context)
+
+
+@login_required
+def editar_perfil(request):
+    """Vista para editar el perfil del usuario"""
+    if request.method == 'POST':
+        form = EditarPerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, '✅ Tu perfil ha sido actualizado correctamente.')
+            return redirect('perfil_usuario')
+    else:
+        form = EditarPerfilForm(instance=request.user)
+    
+    context = {
+        'form': form,
+        'titulo': 'Editar Perfil'
+    }
+    return render(request, 'users/editar_perfil.html', context)
+
+
+@login_required
+def cambiar_password(request):
+    """Vista para cambiar la contraseña"""
+    if request.method == 'POST':
+        form = CambiarPasswordForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            # Actualizar la sesión para que no se desloguee
+            update_session_auth_hash(request, user)
+            messages.success(request, '🔒 Tu contraseña ha sido cambiada exitosamente.')
+            return redirect('perfil_usuario')
+        else:
+            messages.error(request, '❌ Por favor corrige los errores.')
+    else:
+        form = CambiarPasswordForm(request.user)
+    
+    context = {
+        'form': form,
+        'titulo': 'Cambiar Contraseña'
+    }
+    return render(request, 'users/cambiar_password.html', context)
