@@ -43,11 +43,19 @@ def index(request):
         ultimas_noticias = Articulo.objects.order_by(campo_orden)[:6]
     else:
         ultimas_noticias = Articulo.objects.order_by(campo_orden)
+    
+    # Obtener las 3 categorías con más artículos publicados
+    categorias_populares = Categoria.objects.annotate(
+        num_articulos=Count('articulos')
+    ).filter(
+        num_articulos__gt=0  # Solo categorías que tengan al menos 1 artículo
+    ).order_by('-num_articulos')[:3]
 
     context = {
         'destacados': articulos_destacados,
         'noticias': ultimas_noticias,
-        'orden_actual': orden, # Pasamos esto para que el select recuerde la opción
+        'orden_actual': orden,
+        'categorias_populares': categorias_populares,
     }
     return render(request, 'pages/index.html', context)
 
@@ -269,10 +277,18 @@ def listar_por_categoria(request, categoria_id):
     
     noticias = Articulo.objects.filter(categoria=categoria).order_by(campo_orden)
     
+    # Obtener las 3 categorías con más artículos publicados (igual que en index)
+    categorias_populares = Categoria.objects.annotate(
+        num_articulos=Count('articulos')
+    ).filter(
+        num_articulos__gt=0
+    ).order_by('-num_articulos')[:3]
+    
     context = {
         'noticias': noticias,
         'categoria_seleccionada': categoria,
         'orden_actual': orden,
+        'categorias_populares': categorias_populares,
     }
     return render(request, 'pages/index.html', context)
 
