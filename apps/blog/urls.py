@@ -21,12 +21,19 @@ urlpatterns = [
     # GESTIÓN DE CATEGORÍAS
     path('categoria/<int:categoria_id>/', views.listar_por_categoria, name='listar_por_categoria'),
 
-    # GESTIÓN DE USUARIOS (ADMIN)
-    path('admin/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
+    # GESTIÓN DE USUARIOS (ADMINISTRADOR)
+    path('gestion/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
+    
+    # GESTIÓN DE CATEGORÍAS (ADMINISTRADOR)
+    path('gestion/categorias/', views.gestion_categorias, name='gestion_categorias'),
+    path('gestion/categoria/crear/', views.crear_categoria, name='crear_categoria'),
+    path('gestion/categoria/editar/<int:id>/', views.editar_categoria, name='editar_categoria'),
+    path('gestion/categoria/eliminar/<int:id>/', views.eliminar_categoria, name='eliminar_categoria'),
 
     # RUTAS DE AUTENTICACIÓN
     path('registro/', views.registro, name='registro'),
     path('login/', auth_views.LoginView.as_view(template_name='users/login.html'), name='login'),
     path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'),
+    path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
 ]
 

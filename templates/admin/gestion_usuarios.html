@@ -1,0 +1,157 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios{% endblock %}
+
+{% block content %}
+<div class="admin-container" style="margin-top: 20px;">
+    <div class="admin-header">
+        <h1>
+            <i class="bi bi-people-fill"></i> Gestión de Usuarios
+        </h1>
+    </div>
+
+    {% if messages %}
+        {% for message in messages %}
+        <div class="alert-custom alert-{{ message.tags }}">
+            <i class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% else %}info-circle{% endif %}"></i>
+            <span>{{ message }}</span>
+            <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    {% endif %}
+
+    <div class="info-cards">
+        <div class="info-card info">
+            <i class="bi bi-person-circle"></i>
+            <h5>Miembro</h5>
+            <p><strong>Permisos:</strong></p>
+            <ul style="text-align: left; font-size: 0.85rem; margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                <li>Ver artículos y noticias</li>
+                <li>Dejar comentarios</li>
+                <li>Editar sus propios comentarios</li>
+            </ul>
+        </div>
+        <div class="info-card success">
+            <i class="bi bi-pencil-square"></i>
+            <h5>Colaborador</h5>
+            <p><strong>Permisos:</strong></p>
+            <ul style="text-align: left; font-size: 0.85rem; margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                <li>Todo lo de Miembro</li>
+                <li>Crear artículos</li>
+                <li>Editar sus propios artículos</li>
+                <li>Eliminar sus propios artículos</li>
+            </ul>
+        </div>
+        <div class="info-card warning">
+            <i class="bi bi-shield-check"></i>
+            <h5>Administrador</h5>
+            <p><strong>Permisos:</strong></p>
+            <ul style="text-align: left; font-size: 0.85rem; margin: 0.5rem 0 0 0; padding-left: 1.5rem;">
+                <li>Todo lo de Colaborador</li>
+                <li>Gestionar roles de usuarios</li>
+                <li>Crear y editar categorías</li>
+                <li>Eliminar categorías sin artículos</li>
+            </ul>
+        </div>
+    </div>
+
+    <!-- Buscador -->
+    <div style="margin-bottom: 2rem;">
+        <form method="get" style="display: flex; gap: 1rem; align-items: center; max-width: 600px;">
+            <div style="flex: 1; position: relative;">
+                <i class="bi bi-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-color); opacity: 0.5;"></i>
+                <input 
+                    type="text" 
+                    name="buscar" 
+                    value="{{ busqueda }}" 
+                    placeholder="Buscar por usuario o email..." 
+                    style="width: 100%; padding: 0.8rem 1rem 0.8rem 3rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-color); font-size: 1rem;"
+                >
+            </div>
+            <button type="submit" class="btn-admin btn-admin-primary" style="min-width: 120px;">
+                <i class="bi bi-search"></i> Buscar
+            </button>
+            {% if busqueda %}
+            <a href="{% url 'gestion_usuarios' %}" class="btn-admin btn-admin-outline" style="min-width: 120px;">
+                <i class="bi bi-x-circle-fill"></i> Limpiar
+            </a>
+            {% endif %}
+        </form>
+    </div>
+
+    {% if busqueda %}
+    <div style="margin-bottom: 1rem; color: var(--text-color);">
+        <i class="bi bi-info-circle"></i> Mostrando {{ usuarios|length }} resultado(s) para: <strong>{{ busqueda }}</strong>
+    </div>
+    {% endif %}
+
+    <div class="admin-table-container">
+        <table class="admin-table">
+            <thead>
+                <tr>
+                    <th style="width: 30%;">Usuario</th>
+                    <th style="width: 35%;">Email</th>
+                    <th style="width: 35%;" class="text-center">Rol</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for usuario in usuarios %}
+                <tr>
+                    <td class="username-cell">
+                        {{ usuario.username }}
+                        {% if usuario.is_superuser %}
+                        <span class="user-badge-super">Super</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ usuario.email|default:"-" }}</td>
+                    <td class="text-center">
+                        {% if usuario.is_superuser %}
+                        <span class="badge-custom badge-danger locked-role">Superusuario</span>
+                        {% else %}
+                            {% if usuario.perfil.rol == 'administrador' and not es_superusuario %}
+                            <span class="badge-custom badge-warning locked-role" title="Solo el superusuario puede modificar administradores">
+                                Administrador <i class="bi bi-lock-fill" style="font-size: 0.8rem;"></i>
+                            </span>
+                            {% else %}
+                            <form method="post" class="role-form" onsubmit="this.querySelector('.btn-save-role').classList.add('saving');">
+                                {% csrf_token %}
+                                <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+                                <div class="role-selector-container">
+                                    <select name="rol" class="role-selector" onchange="this.form.querySelector('.btn-save-role').style.display='inline-flex';">
+                                        {% for value, display in roles_disponibles %}
+                                        <option value="{{ value }}" {% if usuario.perfil.rol == value %}selected{% endif %}>
+                                            {{ display }}
+                                        </option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" class="btn-save-role" style="display: none;" title="Guardar cambios">
+                                        <i class="bi bi-check-circle-fill"></i>
+                                    </button>
+                                </div>
+                            </form>
+                            {% endif %}
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3">
+                        <div class="empty-state">
+                            <i class="bi bi-person-x"></i>
+                            <p>No se encontraron usuarios{% if busqueda %} que coincidan con "{{ busqueda }}"{% endif %}</p>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <div style="margin-top: 2rem;">
+        <a href="{% url 'index' %}" class="btn-admin btn-admin-outline">
+            <i class="bi bi-arrow-left-circle"></i> Volver al inicio
+        </a>
+    </div>
+</div>
+{% endblock %}

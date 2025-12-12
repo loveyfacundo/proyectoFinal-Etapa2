@@ -1,0 +1,47 @@
+{% extends "base.html" %} {% load static %} {% block title %}Eliminar
+Categoría{% endblock %} {% block content %}
+<div class="container" style="margin-top: 100px; margin-bottom: 40px">
+  <div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+      <div class="card border-danger">
+        <div class="card-header bg-danger text-white">
+          <h2 class="mb-0">
+            <i class="bi bi-exclamation-triangle"></i> Confirmar Eliminación
+          </h2>
+        </div>
+        <div class="card-body">
+          <p class="lead">
+            ¿Estás seguro de que deseas eliminar la categoría
+            <strong>"{{ categoria.nombre }}"</strong>?
+          </p>
+
+          {% if categoria.descripcion %}
+          <div class="alert alert-info">
+            <strong>Descripción:</strong> {{ categoria.descripcion }}
+          </div>
+          {% endif %}
+
+          <div class="alert alert-warning">
+            <i class="bi bi-info-circle"></i> Esta acción no se puede deshacer.
+          </div>
+
+          <form method="post">
+            {% csrf_token %}
+            <div class="d-flex gap-2">
+              <button type="submit" class="btn btn-danger">
+                <i class="bi bi-trash"></i> Eliminar
+              </button>
+              <a
+                href="{% url 'gestion_categorias' %}"
+                class="btn btn-secondary"
+              >
+                <i class="bi bi-x-circle"></i> Cancelar
+              </a>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

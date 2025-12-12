@@ -1,6 +1,96 @@
 // Archivo JavaScript principal
 console.log("TodoDeporte cargado correctamente");
 
+// Menú móvil desplegable
+(function mobileMenu() {
+  const menuToggle = document.querySelector(".mobile-menu-toggle");
+  const mobileMenu = document.querySelector(".mobile-menu");
+  const body = document.body;
+
+  console.log("Menú móvil inicializado:", { menuToggle, mobileMenu });
+
+  if (!menuToggle || !mobileMenu) {
+    console.warn("No se encontraron elementos del menú móvil");
+    return;
+  }
+
+  const menuIcon = menuToggle.querySelector(".menu-icon use");
+
+  // Abrir/cerrar menú
+  menuToggle.addEventListener("click", () => {
+    const isOpen = mobileMenu.classList.contains("open");
+    mobileMenu.classList.toggle("open");
+    menuToggle.classList.toggle("open");
+    menuToggle.setAttribute("aria-expanded", String(!isOpen));
+    body.style.overflow = !isOpen ? "hidden" : "";
+
+    // Cambiar icono
+    if (menuIcon) {
+      const currentHref = menuIcon.getAttribute("href") || "";
+      const newIcon = !isOpen ? "#x" : "#menu";
+      menuIcon.setAttribute("href", currentHref.replace(/#(menu|x)/, newIcon));
+    }
+  });
+
+  // Cerrar menú al hacer clic fuera
+  mobileMenu.addEventListener("click", (e) => {
+    if (e.target === mobileMenu) {
+      mobileMenu.classList.remove("open");
+      menuToggle.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      body.style.overflow = "";
+
+      // Restaurar icono
+      if (menuIcon) {
+        const currentHref = menuIcon.getAttribute("href") || "";
+        menuIcon.setAttribute(
+          "href",
+          currentHref.replace(/#(menu|x)/, "#menu")
+        );
+      }
+    }
+  });
+
+  // Submenu toggle
+  const dropdownToggles = document.querySelectorAll(".mobile-dropdown-toggle");
+  dropdownToggles.forEach((toggle) => {
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      const parent = toggle.closest(".mobile-dropdown");
+      const isOpen = parent.classList.contains("open");
+
+      // Cerrar otros submenus
+      document.querySelectorAll(".mobile-dropdown.open").forEach((dd) => {
+        if (dd !== parent) dd.classList.remove("open");
+      });
+
+      parent.classList.toggle("open", !isOpen);
+    });
+  });
+
+  // Cerrar menú al hacer clic en un enlace
+  const mobileLinks = mobileMenu.querySelectorAll(
+    ".mobile-nav-link:not(.mobile-dropdown-toggle), .mobile-submenu-link"
+  );
+  mobileLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      mobileMenu.classList.remove("open");
+      menuToggle.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      body.style.overflow = "";
+
+      // Restaurar icono
+      if (menuIcon) {
+        const currentHref = menuIcon.getAttribute("href") || "";
+        menuIcon.setAttribute(
+          "href",
+          currentHref.replace(/#(menu|x)/, "#menu")
+        );
+      }
+    });
+  });
+})();
+
 // Alternador de tema - Modo oscuro/claro
 (function themeToggle() {
   const body = document.body;

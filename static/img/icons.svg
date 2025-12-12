@@ -23,4 +23,28 @@
   <symbol id="logout" viewBox="0 0 24 24" fill="currentColor">
     <path d="M17 7l-1.4 1.4 2.6 2.6H9v2h9.2l-2.6 2.6L17 17l5-5-5-5ZM4 5h8V3H4c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h8v-2H4V5Z"/>
   </symbol>
+  <symbol id="menu" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M3 6h18v2H3V6Zm0 5h18v2H3v-2Zm0 5h18v2H3v-2Z"/>
+  </symbol>
+  <symbol id="x" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M18.3 5.7a1 1 0 0 1 0 1.4L13.4 12l4.9 4.9a1 1 0 1 1-1.4 1.4L12 13.4l-4.9 4.9a1 1 0 1 1-1.4-1.4L10.6 12 5.7 7.1a1 1 0 0 1 1.4-1.4L12 10.6l4.9-4.9a1 1 0 0 1 1.4 0Z"/>
+  </symbol>
+  <symbol id="home" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 3l-10 9h3v9h6v-6h2v6h6v-9h3l-10-9z"/>
+  </symbol>
+  <symbol id="trophy" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M6 3h12v5c0 3.31-2.69 6-6 6s-6-2.69-6-6V3zm-2 3H2v2c0 2.21 1.79 4 4 4v-6zm16 0h2v2c0 2.21-1.79 4-4 4V6h2zM12 15c1.66 0 3-1.34 3-3h-6c0 1.66 1.34 3 3 3zm-2 2v4h4v-4h-4z"/>
+  </symbol>
+  <symbol id="info" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
+  </symbol>
+  <symbol id="mail" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z"/>
+  </symbol>
+  <symbol id="plus" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6v2z"/>
+  </symbol>
+  <symbol id="tag" viewBox="0 0 24 24" fill="currentColor">
+    <path d="M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58.55 0 1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41 0-.55-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z"/>
+  </symbol>
 </svg>
