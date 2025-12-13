@@ -1,26 +1,31 @@
 <footer>
     <div class="footer-grid">
-        <div>
+        
+        <div class="footer-col">
             <h3>TodoDeporte</h3>
             <ul>
                 <li><a href="#">Facebook</a></li>
                 <li><a href="#">Instagram</a></li>
             </ul>
         </div>
-        <div>
+
+        <div class="footer-col">
             <h3>Enlaces</h3>
             <ul>
                 <li><a href="{% url 'about' %}">Acerca de</a></li>
                 <li><a href="{% url 'contact' %}">Contacto</a></li>
             </ul>
         </div>
-        <div>
+
+        <div class="footer-col newsletter-col">
             <h3>Newsletter</h3>
-            <form class="newsletter" action="#" method="post">
-                <input type="email" placeholder="Email" aria-label="Email" />
-                <button type="submit">Enviar</button>
+            <form class="newsletter-form" method="post">
+                {% csrf_token %}
+                <input type="email" placeholder="Tu correo" required>
+                <button type="submit">Suscribirme</button>
             </form>
         </div>
     </div>
+
     <p class="footer-copy">&copy; {% now "Y" %} TodoDeporte</p>
 </footer>

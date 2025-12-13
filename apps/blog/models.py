@@ -20,7 +20,7 @@ class Perfil(models.Model):
         ('colaborador', 'Colaborador'),
         ('administrador', 'Administrador'),
     ]
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil_blog')
     rol = models.CharField(max_length=20, choices=USUARIO_ROLES, default='miembro')
 
     class Meta:
