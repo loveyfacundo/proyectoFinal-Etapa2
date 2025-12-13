@@ -37,11 +37,20 @@
         <h2 style="margin-bottom: 1rem">Crear cuenta</h2>
         <form
           class="auth-form"
-          action="{% url 'register' %}"
+          action="{% url 'registro' %}"
           method="post"
           novalidate
         >
           {% csrf_token %}
+          
+          {% if form.non_field_errors %}
+          <div class="form-errors">
+            {% for error in form.non_field_errors %}
+            <div class="error-message">{{ error }}</div>
+            {% endfor %}
+          </div>
+          {% endif %}
+
           <div class="form-row">
             <label for="id_username">Usuario</label>
             <input
@@ -51,8 +60,18 @@
               required
               placeholder="tu_usuario"
               autocomplete="username"
+              value="{{ form.username.value|default:'' }}"
+              class="{% if form.username.errors %}input-error{% endif %}"
             />
+            {% if form.username.errors %}
+            <div class="field-error">
+              {% for error in form.username.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
+          
           <div class="form-row">
             <label for="id_email">Email</label>
             <input
@@ -62,19 +81,38 @@
               required
               placeholder="tucorreo@ejemplo.com"
               autocomplete="email"
+              value="{{ form.email.value|default:'' }}"
+              class="{% if form.email.errors %}input-error{% endif %}"
             />
+            {% if form.email.errors %}
+            <div class="field-error">
+              {% for error in form.email.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
+          
           <div class="form-row">
             <label for="id_password1">Contraseña</label>
             <input
               id="id_password1"
-              name="password1"
+              name="password"
               type="password"
               required
               placeholder="••••••••"
               autocomplete="new-password"
+              class="{% if form.password.errors %}input-error{% endif %}"
             />
+            {% if form.password.errors %}
+            <div class="field-error">
+              {% for error in form.password.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
+          
           <div class="form-row">
             <label for="id_password2">Confirmar contraseña</label>
             <input
@@ -84,11 +122,20 @@
               required
               placeholder="••••••••"
               autocomplete="new-password"
+              class="{% if form.password2.errors %}input-error{% endif %}"
             />
+            {% if form.password2.errors %}
+            <div class="field-error">
+              {% for error in form.password2.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
+          
           <div class="form-row form-inline">
             <label class="checkbox">
-              <input type="checkbox" name="terms" required />
+              <input type="checkbox" name="terms" required {% if form.terms.value %}checked{% endif %} />
               <span>
                 Acepto los
                 <a href="{% url 'terms' %}" class="link"
@@ -96,7 +143,15 @@
                 >
               </span>
             </label>
+            {% if form.terms.errors %}
+            <div class="field-error" style="width: 100%; margin-top: 0.25rem;">
+              {% for error in form.terms.errors %}
+              {{ error }}
+              {% endfor %}
+            </div>
+            {% endif %}
           </div>
+          
           <div class="form-actions">
             <button type="submit" class="btn-primary">Registrarme</button>
             <p class="form-hint">
@@ -171,6 +226,26 @@
       }
       .link:hover {
         text-decoration: underline;
+      }
+      .form-errors {
+        background: #fee;
+        border: 1px solid #fcc;
+        border-radius: 6px;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+      }
+      .error-message {
+        color: #c00;
+        font-size: 0.9rem;
+      }
+      .field-error {
+        color: #c00;
+        font-size: 0.85rem;
+        margin-top: 0.25rem;
+      }
+      .input-error {
+        border-color: #c00 !important;
+        background: #fff5f5 !important;
       }
     </style>
   </body>

@@ -1,0 +1,328 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios - TodoDeporte{% endblock %}
+
+{% block content %}
+<div class="gestion-container">
+    <div class="gestion-header">
+        <h1>👥 Gestión de Usuarios</h1>
+        <p>Administra los roles y permisos de los usuarios</p>
+    </div>
+
+    {% if usuarios %}
+        <table class="usuarios-tabla">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol Actual</th>
+                    <th>Cambiar Rol</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for usuario in usuarios %}
+                    {% with perfil=usuario.perfil_users %}
+                        <tr {% if request.user.id == usuario.id %}class="current-user"{% endif %}>
+
+                            <td class="usuario-info">{{ usuario.username }}</td>
+                            <td>{{ usuario.email }}</td>
+
+                            <td>
+                                {% if usuario.is_superuser %}
+                                    <span class="rol-actual superuser">👑 Superusuario</span>
+                                {% else %}
+                                    {% if perfil and perfil.rol == 'administrador' %}
+                                        <span class="rol-actual">🔐 Administrador</span>
+                                    {% elif perfil and perfil.rol == 'colaborador' %}
+                                        <span class="rol-actual">✏️ Colaborador</span>
+                                    {% else %}
+                                        <span class="rol-actual">👤 Miembro</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if usuario.is_superuser %}
+                                    <span style="color: #999; font-size: 0.9rem;">No se puede modificar</span>
+                                {% else %}
+                                    <form method="POST" class="rol-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+
+                                        <select name="rol">
+                                            <option value="">-- Seleccionar rol --</option>
+                                            {% for valor, etiqueta in roles_disponibles %}
+                                                <option value="{{ valor }}"
+                                                    {% if perfil and perfil.rol == valor %}selected{% endif %}>
+                                                    {{ etiqueta }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <button type="submit">Actualizar</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="acciones-gestion">
+            <a href="{% url 'users_lista' %}">📋 Ver lista de usuarios</a>
+        </div>
+
+    {% else %}
+        <div class="no-usuarios">
+            <p>No hay usuarios registrados en el sistema.</p>
+        </div>
+    {% endif %}
+</div>
+
+<style>
+    .gestion-container {
+        max-width: 1200px;
+        margin: 3rem auto;
+        padding: 0 1.5rem;
+    }
+
+    .gestion-header {
+        text-align: center;
+        margin-bottom: 3rem;
+        padding-bottom: 2rem;
+        border-bottom: 3px solid var(--border-color);
+    }
+
+    .gestion-header h1 {
+        font-size: 2.5rem;
+        color: var(--title-color);
+        margin-bottom: 0.75rem;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 1rem;
+    }
+
+    .gestion-header p {
+        color: var(--footer-text);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    .usuarios-tabla {
+        width: 100%;
+        background: var(--card-bg);
+        border-radius: 16px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px var(--card-shadow);
+        border: 1px solid var(--border-color);
+    }
+
+    .usuarios-tabla thead {
+        background: linear-gradient(135deg, var(--header-bg) 0%, #0a5c00 100%);
+        color: white;
+    }
+
+    .usuarios-tabla thead th {
+        padding: 1.25rem 1.5rem;
+        text-align: left;
+        font-weight: 700;
+        font-size: 1rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .usuarios-tabla tbody tr {
+        border-bottom: 1px solid var(--border-color);
+        transition: background-color 0.2s ease;
+    }
+
+    .usuarios-tabla tbody tr:hover {
+        background: rgba(16, 134, 0, 0.05);
+    }
+
+    .usuarios-tabla tbody tr.current-user {
+        background: rgba(16, 134, 0, 0.08);
+    }
+
+    .usuarios-tabla tbody tr:last-child {
+        border-bottom: none;
+    }
+
+    .usuarios-tabla td {
+        padding: 1.25rem 1.5rem;
+        color: var(--text-color);
+        font-size: 0.95rem;
+    }
+
+    .usuario-info {
+        font-weight: 600;
+        color: var(--title-color);
+    }
+
+    .rol-actual {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 1rem;
+        background: rgba(16, 134, 0, 0.1);
+        border: 1px solid rgba(16, 134, 0, 0.3);
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: var(--header-bg);
+    }
+
+    .rol-actual.superuser {
+        background: linear-gradient(135deg, #ffd700 0%, #ffed4e 100%);
+        border-color: #ffd700;
+        color: #8b6914;
+    }
+
+    .rol-form {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+    }
+
+    .rol-form select {
+        padding: 0.65rem 1rem;
+        border: 2px solid var(--border-color);
+        border-radius: 8px;
+        background: var(--bg-color);
+        color: var(--text-color);
+        font-size: 0.9rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        min-width: 180px;
+    }
+
+    .rol-form select:hover {
+        border-color: var(--header-bg);
+    }
+
+    .rol-form select:focus {
+        outline: none;
+        border-color: var(--header-bg);
+        box-shadow: 0 0 0 3px rgba(16, 134, 0, 0.1);
+    }
+
+    .rol-form button {
+        padding: 0.65rem 1.5rem;
+        background: var(--header-bg);
+        color: white;
+        border: none;
+        border-radius: 8px;
+        font-weight: 700;
+        font-size: 0.9rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        box-shadow: 0 2px 8px rgba(16, 134, 0, 0.3);
+    }
+
+    .rol-form button:hover {
+        background: #0a5c00;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(16, 134, 0, 0.4);
+    }
+
+    .rol-form button:active {
+        transform: translateY(0);
+    }
+
+    .acciones-gestion {
+        margin-top: 2rem;
+        text-align: center;
+    }
+
+    .acciones-gestion a {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.875rem 2rem;
+        background: transparent;
+        border: 2px solid var(--border-color);
+        color: var(--text-color);
+        text-decoration: none;
+        border-radius: 12px;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .acciones-gestion a:hover {
+        border-color: var(--header-bg);
+        color: var(--header-bg);
+        transform: translateY(-2px);
+    }
+
+    .no-usuarios {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: var(--card-bg);
+        border-radius: 16px;
+        border: 2px dashed var(--border-color);
+    }
+
+    .no-usuarios p {
+        color: var(--footer-text);
+        font-size: 1.1rem;
+        margin: 0;
+    }
+
+    @media (max-width: 992px) {
+        .usuarios-tabla {
+            display: block;
+            overflow-x: auto;
+        }
+
+        .usuarios-tabla thead th,
+        .usuarios-tabla td {
+            padding: 1rem;
+            font-size: 0.9rem;
+        }
+
+        .rol-form {
+            flex-direction: column;
+            align-items: stretch;
+        }
+
+        .rol-form select {
+            min-width: 100%;
+        }
+    }
+
+    @media (max-width: 768px) {
+        .gestion-container {
+            padding: 0 1rem;
+            margin: 2rem auto;
+        }
+
+        .gestion-header h1 {
+            font-size: 2rem;
+        }
+
+        .gestion-header p {
+            font-size: 1rem;
+        }
+
+        .usuarios-tabla thead th,
+        .usuarios-tabla td {
+            padding: 0.75rem;
+            font-size: 0.85rem;
+        }
+
+        .rol-form select,
+        .rol-form button {
+            font-size: 0.85rem;
+            padding: 0.6rem 1rem;
+        }
+    }
+</style>
+{% endblock %}

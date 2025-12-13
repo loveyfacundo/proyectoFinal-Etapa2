@@ -15,6 +15,7 @@ from django.db.models import Q
 from apps.blog.forms import (
     ArticuloForm,
     RegistroForm,
+    PerfilForm,
     ComentarioForm,
     CategoriaForm,
     EditarPerfilForm,
@@ -136,7 +137,7 @@ def registro(request):
             return redirect('index') # Redirigir al inicio
     else:
         form = RegistroForm()
-    return render(request, 'users/register.html', {'form': form})
+    return render(request, 'register.html', {'form': form})
 
 # --- Verifica si es superusuario O si tiene el rol de colaborador o administrador ---
 def es_colaborador(user):
@@ -240,6 +241,10 @@ def eliminar_comentario(request, id):
     
     return render(request, 'blog/comentario_confirm_delete.html', {'comentario': comentario})
 
+def terms(request):
+    """Vista para mostrar términos y condiciones"""
+    return render(request, 'terms.html')
+
 def contact(request):
     if request.method == 'POST':
         form = ContactoForm(request.POST)
@@ -340,7 +345,7 @@ def gestion_usuarios(request):
                 elif nuevo_rol in ['miembro', 'colaborador', 'administrador']:
                     perfil.rol = nuevo_rol
                     perfil.save()
-                    messages.success(request, f'Rol de {usuario.username} actualizado a {perfil.get_rol_display()}')
+                    # Mensaje eliminado - ya se muestra en el frontend con JavaScript
                 else:
                     messages.error(request, 'Rol no válido')
                     
@@ -458,3 +463,99 @@ def editar_perfil(request):
     return render(request, 'users/editar_perfil.html', context)
 
 
+# ================================================
+# VISTAS DE GESTIÓN DE USUARIOS (movidas desde users app)
+# ================================================
+
+from .decorators import administrador_required, visitante_required
+
+# Roles disponibles
+ROLES_DISPONIBLES = [
+    ('miembro', 'Miembro'),
+    ('colaborador', 'Colaborador'),
+    ('administrador', 'Administrador'),
+]
+
+@administrador_required
+def gestion_usuarios(request):
+    if request.method == 'POST':
+        usuario_id = request.POST.get('usuario_id')
+        nuevo_rol = request.POST.get('rol')
+
+        try:
+            usuario = User.objects.get(id=usuario_id)
+            if not usuario.is_superuser:
+                perfil = Perfil.objects.get_or_create(user=usuario)[0]
+                perfil.rol = nuevo_rol
+                perfil.save()
+            else:
+                messages.error(request, 'No se puede modificar el rol del superusuario.')
+        except User.DoesNotExist:
+            messages.error(request, 'Usuario no encontrado.')
+
+        return redirect('gestion_usuarios')
+
+    # Asegurar que todos tengan perfil
+    for u in User.objects.all():
+        Perfil.objects.get_or_create(user=u)
+
+    usuarios = User.objects.all()
+    return render(request, 'admin/gestion_usuarios.html', {
+        'usuarios': usuarios,
+        'roles_disponibles': ROLES_DISPONIBLES,
+        'es_superusuario': request.user.is_superuser
+    })
+
+
+@administrador_required
+def lista_usuarios(request):
+    usuarios = User.objects.all()
+    return render(request, 'users/lista_usuarios.html', {
+        'usuarios': usuarios
+    })
+
+
+@login_required
+def perfil_usuario(request):
+    usuario = request.user
+    return render(request, 'users/perfil.html', {
+        'usuario_perfil': usuario,
+        'es_propio': True
+    })
+
+
+@login_required
+def editar_perfil_usuario(request):
+    if request.method == 'POST':
+        form = PerfilForm(request.POST, instance=request.user)
+        if form.is_valid():
+            form.save()
+            messages.success(request, "Perfil actualizado correctamente.")
+            return redirect('perfil_usuario')
+    else:
+        form = PerfilForm(instance=request.user)
+    
+    return render(request, 'users/editar_perfil.html', {'form': form})
+
+
+@login_required
+def cambiar_password(request):
+    from django.contrib.auth.forms import PasswordChangeForm
+    
+    if request.method == 'POST':
+        form = PasswordChangeForm(request.user, request.POST)
+        if form.is_valid():
+            user = form.save()
+            update_session_auth_hash(request, user)
+            messages.success(request, "Contraseña actualizada correctamente.")
+            return redirect('perfil_usuario')
+    else:
+        form = PasswordChangeForm(request.user)
+    
+    for field in form.fields.values():
+        field.widget.attrs['class'] = 'form-control'
+    
+    return render(request, 'users/cambiar_password.html', {
+        'form': form,
+        'titulo': 'Cambiar Contraseña'
+    })

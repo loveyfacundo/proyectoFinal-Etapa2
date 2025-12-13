@@ -58,33 +58,25 @@
 
     <!-- Buscador -->
     <div style="margin-bottom: 2rem;">
-        <form method="get" style="display: flex; gap: 1rem; align-items: center; max-width: 600px;">
+        <div style="display: flex; gap: 1rem; align-items: center; max-width: 600px;">
             <div style="flex: 1; position: relative;">
                 <i class="bi bi-search" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--text-color); opacity: 0.5;"></i>
                 <input 
                     type="text" 
-                    name="buscar" 
-                    value="{{ busqueda }}" 
+                    id="searchInput"
                     placeholder="Buscar por usuario o email..." 
                     style="width: 100%; padding: 0.8rem 1rem 0.8rem 3rem; border: 2px solid var(--border-color); border-radius: 8px; background: var(--card-bg); color: var(--text-color); font-size: 1rem;"
                 >
             </div>
-            <button type="submit" class="btn-admin btn-admin-primary" style="min-width: 120px;">
-                <i class="bi bi-search"></i> Buscar
-            </button>
-            {% if busqueda %}
-            <a href="{% url 'gestion_usuarios' %}" class="btn-admin btn-admin-outline" style="min-width: 120px;">
+            <button id="clearSearch" class="btn-admin btn-admin-outline" style="min-width: 120px; display: none;">
                 <i class="bi bi-x-circle-fill"></i> Limpiar
-            </a>
-            {% endif %}
-        </form>
+            </button>
+        </div>
     </div>
 
-    {% if busqueda %}
-    <div style="margin-bottom: 1rem; color: var(--text-color);">
-        <i class="bi bi-info-circle"></i> Mostrando {{ usuarios|length }} resultado(s) para: <strong>{{ busqueda }}</strong>
+    <div id="searchResults" style="margin-bottom: 1rem; color: var(--text-color); display: none;">
+        <i class="bi bi-info-circle"></i> Mostrando <strong id="resultCount">0</strong> resultado(s)
     </div>
-    {% endif %}
 
     <div class="admin-table-container">
         <table class="admin-table">
@@ -95,14 +87,11 @@
                     <th style="width: 35%;" class="text-center">Rol</th>
                 </tr>
             </thead>
-            <tbody>
+            <tbody id="usersTableBody">
                 {% for usuario in usuarios %}
-                <tr>
+                <tr class="user-row" data-username="{{ usuario.username|lower }}" data-email="{{ usuario.email|lower|default:'' }}">
                     <td class="username-cell">
                         {{ usuario.username }}
-                        {% if usuario.is_superuser %}
-                        <span class="user-badge-super">Super</span>
-                        {% endif %}
                     </td>
                     <td>{{ usuario.email|default:"-" }}</td>
                     <td class="text-center">
@@ -156,4 +145,50 @@
         </a>
     </div>
 </div>
+
+<script>
+// Filtrado en tiempo real de usuarios
+const searchInput = document.getElementById('searchInput');
+const clearButton = document.getElementById('clearSearch');
+const searchResults = document.getElementById('searchResults');
+const resultCount = document.getElementById('resultCount');
+const userRows = document.querySelectorAll('.user-row');
+
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        let visibleCount = 0;
+        
+        userRows.forEach(row => {
+            const username = row.dataset.username;
+            const email = row.dataset.email;
+            
+            // Buscar en username o email
+            if (username.includes(searchTerm) || email.includes(searchTerm)) {
+                row.style.display = '';
+                visibleCount++;
+            } else {
+                row.style.display = 'none';
+            }
+        });
+        
+        // Mostrar/ocultar elementos según si hay búsqueda
+        if (searchTerm) {
+            clearButton.style.display = '';
+            searchResults.style.display = '';
+            resultCount.textContent = visibleCount;
+        } else {
+            clearButton.style.display = 'none';
+            searchResults.style.display = 'none';
+        }
+    });
+    
+    // Botón limpiar
+    clearButton.addEventListener('click', function() {
+        searchInput.value = '';
+        searchInput.dispatchEvent(new Event('input'));
+        searchInput.focus();
+    });
+}
+</script>
 {% endblock %}

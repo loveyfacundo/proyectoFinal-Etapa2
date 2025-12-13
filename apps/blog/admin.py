@@ -40,13 +40,13 @@ class CategoriaAdmin(admin.ModelAdmin):
 
 @admin.register(Perfil)
 class PerfilAdmin(admin.ModelAdmin):
-    list_display = ['usuario', 'rol', 'get_email']
+    list_display = ['user', 'rol', 'get_email']
     list_filter = ['rol']
-    search_fields = ['usuario__username', 'usuario__email']
+    search_fields = ['user__username', 'user__email']
     
     def get_email(self, obj):
         """Muestra el email del usuario"""
-        return obj.usuario.email
+        return obj.user.email
     get_email.short_description = 'Email'
 
 @admin.register(Articulo)
