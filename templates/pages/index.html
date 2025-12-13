@@ -43,79 +43,35 @@
             </ul>
         </div>
 
-        {# Barra lateral de categorías #}
+        {# Barra lateral de categorías - solo en home #}
+        {% if not categoria_seleccionada %}
         <aside class="home-column">
-            <h2>Categorías Populares</h2>
-            
-            {% if categorias_populares %}
-                <ul class="category-list">
-                    {% for cat in categorias_populares %}
-                        <li class="categoria-item-destacada">
-                            <a href="{% url 'listar_por_categoria' cat.id %}">
-                                <span class="categoria-nombre">{{ cat.nombre }}</span>
-                                <span class="categoria-count">{{ cat.num_articulos }} artículo{{ cat.num_articulos|pluralize }}</span>
-                            </a>
-                        </li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                <p style="color: var(--footer-text); font-style: italic;">No hay categorías con artículos aún.</p>
-            {% endif %}
+            <div class="categories-header">
+                <h2>
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/>
+                    </svg>
+                    Categorías Populares
+                </h2>
+            </div>
+            <ul class="category-list">
+                {% for cat in categorias %}
+                    <li data-position="{{ forloop.counter }}">
+                        <a href="{% url 'listar_por_categoria' cat.id %}">
+                            <span class="category-name">{{ cat.nombre }}</span>
+                            <span class="category-stats">
+                                <span class="stat-item stat-articles">{{ cat.total_articulos }} art.</span>
+                                <span class="stat-item stat-comments">{{ cat.total_comentarios }} com.</span>
+                            </span>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li style="padding: 1rem; text-align: center; color: var(--footer-text);">
+                        No hay categorías disponibles
+                    </li>
+                {% endfor %}
+            </ul>
         </aside>
+        {% endif %}
     </section>
-    
-    <style>
-        /* Estilos para categorías destacadas */
-        .categoria-item-destacada {
-            margin-bottom: 1rem;
-        }
-        
-        .categoria-item-destacada a {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 1rem;
-            background: var(--card-bg);
-            border: 2px solid var(--border-color);
-            border-radius: 10px;
-            text-decoration: none;
-            transition: all 0.3s ease;
-        }
-        
-        .categoria-item-destacada a:hover {
-            border-color: var(--header-bg);
-            transform: translateX(5px);
-            box-shadow: 0 4px 12px rgba(16, 134, 0, 0.15);
-        }
-        
-        .categoria-nombre {
-            font-weight: 600;
-            font-size: 1.05rem;
-            color: var(--title-color);
-        }
-        
-        .categoria-count {
-            background: var(--header-bg);
-            color: white;
-            padding: 0.3rem 0.8rem;
-            border-radius: 50px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .categoria-item-destacada:nth-child(1) .categoria-count {
-            background: #FFD700; /* Oro para la primera */
-            color: #000;
-        }
-        
-        .categoria-item-destacada:nth-child(2) .categoria-count {
-            background: #C0C0C0; /* Plata para la segunda */
-            color: #000;
-        }
-        
-        .categoria-item-destacada:nth-child(3) .categoria-count {
-            background: #CD7F32; /* Bronce para la tercera */
-            color: #fff;
-        }
-    </style>
 {% endblock %}

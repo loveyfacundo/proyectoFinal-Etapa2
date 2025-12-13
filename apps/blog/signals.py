@@ -10,7 +10,7 @@ def crear_perfil_usuario(sender, instance, created, **kwargs):
 
     if created:
         Perfil.objects.create(
-            usuario=instance,
+            user=instance,
             # Rol predeterminado
             rol='miembro'
         )

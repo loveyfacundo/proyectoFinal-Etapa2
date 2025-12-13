@@ -1,0 +1,179 @@
+{% extends "base.html" %} {% load static %} {% block title %}Gestión de
+Categorías{% endblock %} {% block extra_js %}
+<script src="{% static 'js/confirm-modal.js' %}"></script>
+{% endblock %} {% block content %}
+<div class="admin-container" style="margin-top: 20px">
+  <div class="admin-header">
+    <div
+      style="
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 1rem;
+      "
+    >
+      <h1><i class="bi bi-folder-fill"></i> Gestión de Categorías</h1>
+      <a
+        href="{% url 'crear_categoria' %}"
+        class="btn-admin btn-admin-primary"
+        style="
+          padding: 0.5rem 0.75rem;
+          font-size: 0.9rem;
+          box-shadow: 0 4px 12px rgba(13, 110, 253, 0.3);
+          white-space: nowrap;
+          min-width: auto;
+          max-width: 200px;
+          background: #0d6efd;
+          border-color: #0d6efd;
+        "
+      >
+        <i class="bi bi-plus-circle-fill"></i> Nueva Categoría
+      </a>
+    </div>
+  </div>
+
+  {% if messages %} {% for message in messages %}
+  <div class="alert-custom alert-{{ message.tags }}">
+    <i
+      class="bi bi-{% if message.tags == 'success' %}check-circle{% elif message.tags == 'error' %}x-circle{% else %}info-circle{% endif %}"
+    ></i>
+    <span>{{ message }}</span>
+    <button
+      type="button"
+      class="btn-close ms-auto"
+      data-bs-dismiss="alert"
+    ></button>
+  </div>
+  {% endfor %} {% endif %}
+
+  <div class="admin-table-container">
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th style="width: 25%">Nombre</th>
+          <th style="width: 50%">Descripción</th>
+          <th style="width: 12%" class="text-center">Artículos</th>
+          <th style="width: 13%" class="text-center">Acciones</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% if categorias %} {% for categoria in categorias %}
+        <tr>
+          <td class="username-cell">{{ categoria.nombre }}</td>
+          <td style="color: var(--text-color); opacity: 0.8">
+            {{ categoria.descripcion|default:"Sin descripción"|truncatewords:20 }}
+          </td>
+          <td class="text-center">
+            <span class="badge-custom badge-info"
+              >{{ categoria.total_articulos }}</span
+            >
+          </td>
+          <td class="text-center">
+            <div class="btn-group-admin">
+              <a
+                href="{% url 'editar_categoria' categoria.id %}"
+                class="btn-admin btn-admin-icon btn-admin-primary"
+                title="Editar categoría"
+                style="
+                  background: var(--header-bg);
+                  color: white;
+                  padding: 0.6rem;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <img
+                  src="{% static 'img/edit_square_icon_183770.svg' %}"
+                  alt="Editar"
+                  style="
+                    width: 20px;
+                    height: 20px;
+                    filter: brightness(0) invert(1);
+                  "
+                />
+              </a>
+              {% if categoria.total_articulos > 0 %}
+              <button
+                type="button"
+                class="btn-admin btn-admin-icon"
+                style="
+                  opacity: 0.5;
+                  cursor: not-allowed;
+                  background: #6c757d;
+                  color: white;
+                  padding: 0.6rem;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+                disabled
+                title="No se puede eliminar: tiene {{ categoria.total_articulos }} artículo(s)"
+              >
+                <img
+                  src="{% static 'img/delete_remove_trash_recycle_icon_183767.svg' %}"
+                  alt="Eliminar"
+                  style="
+                    width: 20px;
+                    height: 20px;
+                    filter: brightness(0) invert(1);
+                    opacity: 0.7;
+                  "
+                />
+              </button>
+              {% else %}
+              <a
+                href="{% url 'eliminar_categoria' categoria.id %}"
+                class="btn-admin btn-admin-icon btn-admin-danger"
+                title="Eliminar categoría"
+                onclick="confirmDelete(event, '¿Estás seguro de eliminar esta categoría?');"
+                style="
+                  padding: 0.6rem;
+                  display: inline-flex;
+                  align-items: center;
+                  justify-content: center;
+                "
+              >
+                <img
+                  src="{% static 'img/delete_remove_trash_recycle_icon_183767.svg' %}"
+                  alt="Eliminar"
+                  style="
+                    width: 20px;
+                    height: 20px;
+                    filter: brightness(0) invert(1);
+                  "
+                />
+              </a>
+              {% endif %}
+            </div>
+          </td>
+        </tr>
+        {% endfor %} {% else %}
+        <tr>
+          <td colspan="4">
+            <div class="empty-state">
+              <i class="bi bi-folder-x"></i>
+              <p>No hay categorías registradas</p>
+              <a
+                href="{% url 'crear_categoria' %}"
+                class="btn-admin btn-admin-primary"
+              >
+                <i class="bi bi-plus-circle-fill"></i> Crear la primera
+                categoría
+              </a>
+            </div>
+          </td>
+        </tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+
+  <div style="margin-top: 2rem">
+    <a href="{% url 'index' %}" class="btn-admin btn-admin-outline">
+      <i class="bi bi-arrow-left-circle"></i> Volver al inicio
+    </a>
+  </div>
+</div>
+{% endblock %}

@@ -1,226 +1,968 @@
-{% extends 'base.html' %}
-{% load static %}
+{% extends 'base.html' %} {% load static %} {% block title %}{{ articulo.titulo
+}} - TodoDeporte{% endblock %} {% block content %}
 
-{% block title %}{{ articulo.titulo }} - TodoDeporte{% endblock %}
+<article class="article-container">
+  <a href="{% url 'index' %}" class="back-button">
+    <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+      <path d="M10 18l-8-8 8-8 1.5 1.5L5.5 9.5H18v2H5.5l6 6z" />
+    </svg>
+    Volver al inicio
+  </a>
 
-{% block content %}
+  <header class="article-header">
+    <div class="article-category-wrapper">
+      <span class="article-category"> {{ articulo.categoria.nombre }} </span>
+    </div>
+
+    <h1 class="article-title">{{ articulo.titulo }}</h1>
+
+    <div class="article-author">
+      <div class="author-avatar">
+        {{ articulo.autor.username|slice:":1"|upper }}
+      </div>
+      <div class="author-info">
+        <span class="author-name"
+          >{{ articulo.autor.first_name|default:articulo.autor.username }}</span
+        >
+        <span class="article-date">
+          <svg
+            width="12"
+            height="12"
+            viewBox="0 0 20 20"
+            fill="currentColor"
+            style="opacity: 0.8"
+          >
+            <path
+              d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z"
+            />
+          </svg>
+          {{ articulo.fecha_creacion|date:"d M Y" }}
+        </span>
+      </div>
+    </div>
+
+    {% if user.is_authenticated %}
+      {% if user.is_superuser or user.perfil.rol == 'administrador' or user == articulo.autor %}
+      <div class="article-meta">
+      <div class="article-actions">
+        <a
+          href="{% url 'editar_articulo' articulo.id %}"
+          class="btn-action btn-edit"
+        >
+          <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+            <path
+              d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"
+            />
+            <path
+              d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"
+            />
+          </svg>
+          Editar
+        </a>
+        <form
+          id="deleteForm-{{ articulo.id }}"
+          method="post"
+          action="{% url 'eliminar_articulo' articulo.id %}"
+          style="display: inline"
+        >
+          {% csrf_token %}
+          <button
+            type="button"
+            class="btn-action btn-delete"
+            onclick="confirmDeleteArticulo(event, '{{ articulo.titulo|escapejs }}')"
+          >
+            <svg width="16" height="16" viewBox="0 0 20 20" fill="currentColor">
+              <path
+                fill-rule="evenodd"
+                d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z"
+                clip-rule="evenodd"
+              />
+            </svg>
+            Eliminar
+          </button>
+        </form>
+      </div>
+      </div>
+      {% endif %}
+    {% endif %}
+  </header>
+
+  {% if articulo.imagen_destacada %}
+  <figure class="article-image">
+    <img
+      src="{{ articulo.imagen_destacada.url }}"
+      alt="{{ articulo.titulo }}"
+    />
+  </figure>
+  {% endif %}
+
+  <div class="article-content">{{ articulo.contenido|linebreaks }}</div>
+
+  <section class="comments-section">
+    <div class="comments-header">
+      <h3>Comentarios</h3>
+      <span class="comments-count">{{ comentarios.count }}</span>
+    </div>
+
+    {% if user.is_authenticated %}
+    <div class="comment-form">
+      <h4>💬 Deja tu opinión</h4>
+      <form method="post">
+        {% csrf_token %} {{ form.contenido }}
+        <button type="submit" class="btn-submit">Publicar comentario</button>
+      </form>
+    </div>
+    {% else %}
+    <div class="login-notice">
+      <strong>✍️ Únete a la conversación</strong><br />
+      Debes
+      <a href="{% url 'login' %}?next={{ request.path }}">iniciar sesión</a>
+      para comentar.
+    </div>
+    {% endif %} {% if comentarios %}
+    <ul class="comments-list">
+      {% for c in comentarios %}
+      <li class="comment-item">
+        <div class="comment-header">
+          <div class="comment-author-info">
+            <div class="comment-avatar">
+              {{ c.autor.username|slice:":1"|upper }}
+            </div>
+            <div class="comment-meta">
+              <strong>{{ c.autor.username }}</strong>
+              <span class="comment-date"
+                >{{ c.fecha_creacion|date:"d M Y, H:i" }}</span
+              >
+            </div>
+          </div>
+
+          {% if user == c.autor or user.is_superuser or user.perfil.rol == 'colaborador' %}
+          <div class="comment-actions">
+            <button 
+              class="btn-comment-action btn-edit-comment" 
+              onclick="editComment({{ c.id }}, '{{ c.contenido|escapejs }}', {{ c.articulo.id }})"
+              title="{% if user == c.autor %}Editar{% else %}Moderar{% endif %}">
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/>
+                <path d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z"/>
+              </svg>
+              {% if user == c.autor %}Editar{% else %}Moderar{% endif %}
+            </button>
+            <button 
+              class="btn-comment-action btn-delete-comment" 
+              onclick="deleteComment({{ c.id }}, '{{ c.contenido|escapejs|truncatewords:15 }}', {{ c.articulo.id }})"
+              title="Eliminar">
+              <svg width="14" height="14" viewBox="0 0 20 20" fill="currentColor">
+                <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd"/>
+              </svg>
+              Eliminar
+            </button>
+          </div>
+          {% endif %}
+        </div>
+
+        <div class="comment-content">{{ c.contenido|linebreaks }}</div>
+      </li>
+      {% endfor %}
+    </ul>
+    {% else %}
+    <div class="empty-comments">
+      <p>💭 No hay comentarios aún. ¡Sé el primero en comentar!</p>
+    </div>
+    {% endif %}
+  </section>
+
+  <div style="margin-top: 3rem; text-align: center">
+    <a href="{% url 'index' %}" class="back-button">
+      <svg width="20" height="20" viewBox="0 0 20 20" fill="currentColor">
+        <path d="M10 18l-8-8 8-8 1.5 1.5L5.5 9.5H18v2H5.5l6 6z" />
+      </svg>
+      Volver al inicio
+    </a>
+  </div>
+</article>
 
 <style>
-    .articulo-header {
-        margin-bottom: 2rem;
-        border-bottom: 1px solid var(--border-color);
-        padding-bottom: 1.5rem;
+  .article-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 2rem 1rem;
+  }
+
+  .back-button {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.75rem 1.5rem;
+    background: var(--card-bg);
+    border: 2px solid var(--border-color);
+    color: var(--text-color);
+    border-radius: 12px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    margin-bottom: 2rem;
+  }
+
+  .back-button:hover {
+    background: var(--border-color);
+    transform: translateX(-4px);
+  }
+
+  /* Header del artículo - Refactorizado */
+  .article-header {
+    background: linear-gradient(135deg, var(--header-bg) 0%, #0d7800 100%);
+    padding: 2.5rem 2.5rem 2rem;
+    border-radius: 20px;
+    margin-bottom: 3rem;
+    box-shadow: 0 10px 30px rgba(16, 134, 0, 0.3);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .article-header::before {
+    content: "";
+    position: absolute;
+    top: -50%;
+    right: -50%;
+    width: 100%;
+    height: 200%;
+    background: linear-gradient(
+      45deg,
+      transparent 30%,
+      rgba(255, 255, 255, 0.1) 50%,
+      transparent 70%
+    );
+    animation: shimmer 3s infinite;
+  }
+
+  @keyframes shimmer {
+    0% {
+      transform: translateX(-100%) translateY(-100%) rotate(45deg);
     }
-    .articulo-category {
-        display: inline-block;
-        background-color: var(--header-bg);
-        color: #fff;
-        padding: 0.25rem 0.75rem;
-        border-radius: 50px;
-        font-size: 0.85rem;
-        font-weight: 600;
-        margin-bottom: 1rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
+    100% {
+      transform: translateX(100%) translateY(100%) rotate(45deg);
     }
-    .articulo-title {
-        font-size: 2.5rem;
-        line-height: 1.2;
-        color: var(--title-color);
-        margin-bottom: 1.5rem;
-        word-wrap: break-word;
-    }
-    .articulo-meta-row {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        flex-wrap: wrap;
-        gap: 1rem;
-        font-size: 0.95rem;
-        color: var(--footer-text);
-    }
-    .articulo-author {
-        display: flex;
-        align-items: center;
-        gap: 0.5rem;
-    }
-    .articulo-author a {
-        color: var(--text-color);
-        text-decoration: none;
-        font-weight: 600;
-        transition: color 0.2s;
-    }
-    .articulo-author a:hover {
-        color: var(--header-bg);
-        text-decoration: underline;
-    }
-    .articulo-actions {
-        display: flex;
-        gap: 0.5rem;
-    }
-    .btn-action {
-        padding: 0.4rem 0.8rem;
-        border-radius: 4px;
-        text-decoration: none;
-        font-size: 0.85rem;
-        font-weight: 600;
-        transition: opacity 0.2s;
-    }
-    .btn-action:hover {
-        opacity: 0.9;
-    }
-    .btn-edit { background-color: #ffc107; color: #212529; }
-    .btn-delete { background-color: #dc3545; color: #fff; }
-    
-    .articulo-figure {
-        margin: 0 0 2rem 0;
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-    }
-    .articulo-img {
-        width: 100%;
-        height: auto;
-        max-height: 500px;
-        object-fit: cover;
-        display: block;
+  }
+
+  .article-category-wrapper {
+    margin-bottom: 1.5rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .article-category {
+    display: inline-block;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--header-bg);
+    padding: 0.5rem 1.25rem;
+    border-radius: 50px;
+    font-size: 0.75rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    backdrop-filter: blur(10px);
+  }
+
+  .article-title {
+    font-size: 3rem;
+    line-height: 1.2;
+    color: white;
+    margin: 0 0 1.5rem 0;
+    font-weight: 900;
+    word-wrap: break-word;
+    letter-spacing: -0.5px;
+    text-shadow: 0 2px 20px rgba(0, 0, 0, 0.3);
+    position: relative;
+    z-index: 1;
+  }
+
+  .article-author {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 2rem;
+    position: relative;
+    z-index: 1;
+  }
+
+  .article-meta {
+    padding: 2rem 0 0 0;
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    z-index: 1;
+  }
+
+  .author-avatar {
+    width: 36px;
+    height: 36px;
+    background: white;
+    color: var(--header-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1rem;
+    font-weight: 800;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    flex-shrink: 0;
+  }
+
+  .author-info {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  .author-name {
+    font-weight: 600;
+    color: white;
+    font-size: 0.85rem;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+  }
+
+  .article-date {
+    color: rgba(255, 255, 255, 0.85);
+    font-size: 0.75rem;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  .article-actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+
+  .btn-action {
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
+    text-decoration: none;
+    font-size: 0.9rem;
+    font-weight: 700;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 2px solid transparent;
+    max-height: 40px;
+    width: 120px;
+  }
+
+  .btn-action:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+
+  .btn-edit {
+    background: white;
+    color: var(--header-bg);
+    border-color: rgba(255, 255, 255, 0.3);
+
+  }
+
+  .btn-edit:hover {
+    background: #f8f8f8;
+  }
+
+  .btn-delete {
+    background: #dc3545;
+    color: white;
+    border-color: rgba(255, 255, 255, 0.2);
+    cursor: pointer;
+  }
+
+  .btn-delete:hover {
+    background: #c82333;
+  }
+
+  form[id^="deleteForm-"] {
+    margin: 0;
+  }
+
+  .article-image {
+    margin: 3rem 0;
+    border-radius: 16px;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  }
+
+  .article-image img {
+    width: 100%;
+    height: auto;
+    max-height: 600px;
+    object-fit: cover;
+    display: block;
+  }
+
+  .article-content {
+    line-height: 1.8;
+    font-size: 1.125rem;
+    color: var(--text-color);
+    margin: 3rem 0;
+  }
+
+  .article-content p {
+    margin-bottom: 1.5rem;
+  }
+
+  .comments-section {
+    background: var(--card-bg);
+    padding: 2.5rem;
+    border-radius: 16px;
+    margin-top: 4rem;
+    border: 1px solid var(--border-color);
+  }
+
+  .comments-header {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid var(--border-color);
+  }
+
+  .comments-header h3 {
+    font-size: 1.75rem;
+    color: var(--title-color);
+    margin: 0;
+  }
+
+  .comments-count {
+    background: var(--header-bg);
+    color: white;
+    padding: 0.25rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.9rem;
+    font-weight: 600;
+  }
+
+  .comment-form {
+    background: var(--bg-color);
+    padding: 2rem;
+    border-radius: 12px;
+    margin-bottom: 2rem;
+    border: 2px solid var(--border-color);
+  }
+
+  .comment-form h4 {
+    margin-bottom: 1rem;
+    color: var(--title-color);
+    font-size: 1.25rem;
+  }
+
+  .comment-form textarea {
+    width: 100%;
+    min-height: 120px;
+    padding: 1rem;
+    border: 2px solid var(--border-color);
+    border-radius: 8px;
+    font-size: 1rem;
+    font-family: inherit;
+    resize: vertical;
+    transition: border-color 0.3s ease;
+  }
+
+  .comment-form textarea:focus {
+    outline: none;
+    border-color: var(--header-bg);
+  }
+
+  .btn-submit {
+    margin-top: 1rem;
+    padding: 0.75rem 2rem;
+    background: var(--header-bg);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 700;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+  }
+
+  .btn-submit:hover {
+    background: #0a5c00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(16, 134, 0, 0.3);
+  }
+
+  .login-notice {
+    padding: 1.5rem;
+    background: #fff3cd;
+    border: 2px solid #ffc107;
+    border-radius: 12px;
+    color: #856404;
+    margin-bottom: 2rem;
+  }
+
+  .login-notice a {
+    color: #856404;
+    font-weight: 700;
+    text-decoration: underline;
+  }
+
+  .comments-list {
+    list-style: none;
+    padding: 0;
+  }
+
+  .comment-item {
+    margin-bottom: 1.5rem;
+    padding: 1.5rem;
+    background: var(--bg-color);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    transition: box-shadow 0.3s ease;
+  }
+
+  .comment-item:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+
+  .comment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+  }
+
+  .comment-author-info {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+  }
+
+  .comment-avatar {
+    width: 40px;
+    height: 40px;
+    background: var(--header-bg);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-weight: 700;
+    font-size: 1rem;
+  }
+
+  .comment-meta strong {
+    display: block;
+    color: var(--title-color);
+    margin-bottom: 0.25rem;
+  }
+
+  .comment-date {
+    font-size: 0.85rem;
+    color: var(--footer-text);
+  }
+
+  .comment-actions {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+  }
+
+  .btn-comment-action {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-family: inherit;
+  }
+
+  .btn-edit-comment {
+    background: rgba(0, 123, 255, 0.1);
+    color: #007bff;
+  }
+
+  .btn-edit-comment:hover {
+    background: rgba(0, 123, 255, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .btn-delete-comment {
+    background: rgba(220, 53, 69, 0.1);
+    color: #dc3545;
+  }
+
+  .btn-delete-comment:hover {
+    background: rgba(220, 53, 69, 0.2);
+    transform: translateY(-2px);
+  }
+
+  .comment-content {
+    line-height: 1.6;
+    color: var(--text-color);
+    margin-left: 56px;
+  }
+
+  .empty-comments {
+    text-align: center;
+    padding: 3rem;
+    color: var(--footer-text);
+    font-style: italic;
+  }
+
+  @media (max-width: 768px) {
+    .article-container {
+      padding: 1.5rem 0.75rem;
     }
 
-    @media (max-width: 768px) {
-        .articulo-title { font-size: 2rem; }
-        .articulo-meta-row { flex-direction: column; align-items: flex-start; }
+    .back-button {
+      padding: 0.65rem 1.25rem;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
     }
+
+    .article-header {
+      padding: 1.5rem 1rem 1.25rem;
+      border-radius: 12px;
+    }
+
+    .article-category-wrapper {
+      margin-bottom: 1rem;
+    }
+
+    .article-category {
+      padding: 0.4rem 1rem;
+      font-size: 0.7rem;
+    }
+
+    .article-title {
+      font-size: 1.75rem;
+      margin-bottom: 1.25rem;
+    }
+
+    .article-author {
+      gap: 0.65rem;
+      margin-bottom: 1.5rem;
+    }
+
+    .author-avatar {
+      width: 32px;
+      height: 32px;
+      font-size: 0.9rem;
+    }
+
+    .author-name {
+      font-size: 0.8rem;
+    }
+
+    .article-date {
+      font-size: 0.7rem;
+    }
+
+    .article-meta {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 1rem;
+      padding-top: 1.25rem;
+    }
+
+    .article-actions {
+      width: 100%;
+      flex-direction: column;
+    }
+
+    .btn-action {
+      width: 100%;
+      justify-content: center;
+    }
+
+    .article-image {
+      margin: 2rem 0;
+      border-radius: 12px;
+    }
+
+    .article-content {
+      padding: 1.25rem;
+      font-size: 0.95rem;
+    }
+
+    .comments-section {
+      padding: 1.25rem;
+    }
+
+    .comments-section h2 {
+      font-size: 1.5rem;
+    }
+
+    .comment-form {
+      padding: 1.25rem;
+    }
+
+    .comment-item {
+      padding: 1rem;
+    }
+
+    .comment-avatar {
+      width: 36px;
+      height: 36px;
+      font-size: 1rem;
+    }
+
+    .comment-author {
+      font-size: 0.9rem;
+    }
+
+    .comment-date {
+      font-size: 0.75rem;
+    }
+
+    .comment-content {
+      margin-left: 0;
+      font-size: 0.9rem;
+    }
+
+    .comment-actions {
+      margin-top: 0.75rem;
+    }
+
+    .comment-btn {
+      padding: 0.4rem 0.75rem;
+      font-size: 0.8rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .article-container {
+      padding: 1rem 0.5rem;
+    }
+
+    .article-header {
+      padding: 1.25rem 0.85rem 1rem;
+      border-radius: 10px;
+    }
+
+    .article-title {
+      font-size: 1.5rem;
+      line-height: 1.3;
+    }
+
+    .article-category {
+      padding: 0.35rem 0.85rem;
+      font-size: 0.65rem;
+    }
+
+    .author-avatar {
+      width: 28px;
+      height: 28px;
+      font-size: 0.8rem;
+    }
+
+    .author-name {
+      font-size: 0.75rem;
+    }
+
+    .article-date {
+      font-size: 0.65rem;
+    }
+
+    .article-content {
+      padding: 1rem;
+      font-size: 0.9rem;
+    }
+
+    .comments-section {
+      padding: 1rem;
+    }
+
+    .comments-section h2 {
+      font-size: 1.25rem;
+    }
+
+    .comment-form {
+      padding: 1rem;
+    }
+
+    .comment-form textarea {
+      font-size: 0.9rem;
+      min-height: 80px;
+    }
+
+    .btn-submit-comment {
+      padding: 0.65rem 1rem;
+      font-size: 0.9rem;
+    }
+
+    .comment-item {
+      padding: 0.85rem;
+    }
+
+    .comment-avatar {
+      width: 32px;
+      height: 32px;
+      font-size: 0.9rem;
+    }
+
+    .back-button {
+      font-size: 0.85rem;
+      padding: 0.6rem 1rem;
+    }
+  }
 </style>
 
-<article class="articulo-detalle" style="max-width: 900px; margin: 0 auto;">
+<script src="{% static 'js/confirm-modal.js' %}"></script>
+<script>
+  function confirmDeleteArticulo(event, titulo) {
+    event.preventDefault();
+    const form = event.target.closest("form");
 
-    <div style="margin-top: 2rem; text-align: center; margin-bottom: 3rem;">
-        <a href="{% url 'index' %}" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); color: var(--text-color); border-radius: 50px; text-decoration: none; transition: background 0.2s;">
-            ← Volver al inicio
-        </a>
-    </div>
-    
-    {# --- CABECERA  --- #}
-    <header class="articulo-header">
-        <span class="articulo-category">
-            {{ articulo.categoria.nombre }}
-        </span>
+    showConfirmModal(
+      `Estás a punto de eliminar el artículo: <strong>"${titulo}"</strong>.<br>Esta acción no se puede deshacer.`,
+      () => {
+        form.submit();
+      },
+      null,
+      {
+        title: "¡Atención!",
+        confirmText: "Sí, Eliminar Definitivamente",
+        cancelText: "Cancelar",
+      }
+    );
+  }
 
-        <h1 class="articulo-title">{{ articulo.titulo }}</h1>
-
-        <div class="articulo-meta-row">
-            
-            <div class="articulo-author">
-                <div style="width: 32px; height: 32px; background: #ddd; border-radius: 50%; display: grid; place-items: center;">
-                    <svg class="icon icon-sm" aria-hidden="true" style="color: #555;">
-                        <use href="{% static 'img/icons.svg' %}#user"></use>
-                    </svg>
-                </div>
-                <div>
-                    Por <a href="{% url 'perfil_usuario_publico' articulo.autor.username %}">{{ articulo.autor.first_name|default:articulo.autor.username }}</a>
-                    <span style="margin: 0 5px;">•</span>
-                    <time>{{ articulo.fecha_creacion|date:"d M Y" }}</time>
-                </div>
+  // Función para editar comentario inline
+  function editComment(commentId, currentContent, articleId) {
+    const modalHTML = `
+      <div class="edit-comment-modal" id="editModal-${commentId}" style="
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 9999;
+      ">
+        <div style="
+          background: var(--card-bg);
+          padding: 2rem;
+          border-radius: 12px;
+          max-width: 600px;
+          width: 90%;
+          box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+        ">
+          <h3 style="margin-top: 0; color: var(--title-color);">Editar Comentario</h3>
+          <form method="post" action="/comentario/editar/${commentId}/">
+            <input type="hidden" name="csrfmiddlewaretoken" value="${getCookie('csrftoken')}">
+            <textarea 
+              name="contenido" 
+              required 
+              style="
+                width: 100%;
+                min-height: 120px;
+                padding: 1rem;
+                border: 2px solid var(--border-color);
+                border-radius: 8px;
+                font-size: 1rem;
+                font-family: inherit;
+                resize: vertical;
+                background: var(--bg-color);
+                color: var(--text-color);
+                margin-bottom: 1rem;
+              "
+            >${currentContent}</textarea>
+            <div style="display: flex; gap: 0.75rem; justify-content: flex-end;">
+              <button 
+                type="button" 
+                onclick="closeEditModal(${commentId})"
+                style="
+                  padding: 0.75rem 1.5rem;
+                  background: var(--bg-color);
+                  color: var(--text-color);
+                  border: 2px solid var(--border-color);
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  transition: all 0.3s ease;
+                "
+              >Cancelar</button>
+              <button 
+                type="submit"
+                style="
+                  padding: 0.75rem 1.5rem;
+                  background: #007bff;
+                  color: white;
+                  border: none;
+                  border-radius: 8px;
+                  cursor: pointer;
+                  font-weight: 600;
+                  transition: all 0.3s ease;
+                "
+              >Guardar Cambios</button>
             </div>
-
-            {% if user.is_superuser or user.perfil.rol == 'colaborador' %}
-                <div class="articulo-actions">
-                    <a href="{% url 'editar_articulo' articulo.id %}" class="btn-action btn-edit">
-                        Editar
-                    </a>
-                    <a href="{% url 'eliminar_articulo' articulo.id %}" class="btn-action btn-delete">
-                        Eliminar
-                    </a>
-                </div>
-            {% endif %}
-
+          </form>
         </div>
-    </header>
+      </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHTML);
+  }
 
-    {# --- IMAGEN DESTACADA --- #}
-    {% if articulo.imagen_destacada %}
-        <figure class="articulo-figure">
-            <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}" class="articulo-img">
-        </figure>
-    {% endif %}
+  function closeEditModal(commentId) {
+    const modal = document.getElementById(`editModal-${commentId}`);
+    if (modal) {
+      modal.remove();
+    }
+  }
 
-    {# --- CONTENIDO DEL ARTÍCULO --- #}
-    <div class="contenido" style="line-height: 1.8; font-size: 1.15rem; color: var(--text-color); margin-bottom: 4rem;">
-        {{ articulo.contenido|linebreaks }}
-    </div>
+  // Función para eliminar comentario con confirmación
+  function deleteComment(commentId, contentPreview, articleId) {
+    showConfirmModal(
+      `¿Estás seguro de que quieres eliminar este comentario?<br><br><em style="color: var(--footer-text);">"${contentPreview}..."</em>`,
+      () => {
+        // Crear formulario y enviarlo
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/comentario/eliminar/${commentId}/`;
+        
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = getCookie('csrftoken');
+        
+        form.appendChild(csrfInput);
+        document.body.appendChild(form);
+        form.submit();
+      },
+      null,
+      {
+        title: "¿Eliminar comentario?",
+        confirmText: "Sí, Eliminar",
+        cancelText: "Cancelar",
+      }
+    );
+  }
 
-    {# --- SECCIÓN DE COMENTARIOS  --- #}
-    <section style="background-color: var(--bg-color); padding: 2rem; border-radius: 8px; margin-top: 3rem;">
-        <h3 style="margin-bottom: 1.5rem; border-bottom: 2px solid var(--border-color); padding-bottom: 0.5rem;">
-            Comentarios ({{ comentarios.count }})
-        </h3>
-
-        {# Formulario #}
-        {% if user.is_authenticated %}
-            <div style="background: var(--card-bg); padding: 1.5rem; border-radius: 8px; margin-bottom: 2rem; box-shadow: 0 2px 4px var(--card-shadow);">
-                <h4 style="margin-bottom: 1rem;">Deja tu opinión</h4>
-                <form method="post">
-                    {% csrf_token %}
-                    {{ form.contenido }}
-                    <button type="submit" style="margin-top: 10px; padding: 8px 20px; background: var(--header-bg); color: white; border: none; border-radius: 4px; cursor: pointer; font-weight: bold;">
-                        Publicar
-                    </button>
-                </form>
-            </div>
-        {% else %}
-            <p style="margin-bottom: 2rem; padding: 1rem; background: #fff3cd; border: 1px solid #ffeeba; border-radius: 6px; color: #856404;">
-                Debes <a href="{% url 'login' %}?next={{ request.path }}" style="font-weight: bold; color: inherit;">iniciar sesión</a> para comentar.
-            </p>
-        {% endif %}
-
-        {# Lista #}
-        {% if comentarios %}
-            <ul style="list-style: none; padding: 0;">
-                {% for c in comentarios %}
-                    <li style="margin-bottom: 1.5rem; padding: 1.5rem; background: var(--card-bg); border-radius: 8px; box-shadow: 0 1px 3px var(--card-shadow);">
-                        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 0.5rem;">
-                            <div style="display: flex; gap: 10px; align-items: center;">
-                                <div style="width: 32px; height: 32px; background: #eee; border-radius: 50%; display: grid; place-items: center; color: #888; font-weight: bold; font-size: 0.8rem;">
-                                    {{ c.autor.username|slice:":1"|upper }}
-                                </div>
-                                <div>
-                                    <a href="{% url 'perfil_usuario_publico' c.autor.username %}" style="display: block; line-height: 1; font-weight: 600; color: var(--text-color); text-decoration: none;">
-                                        {{ c.autor.username }}
-                                    </a>
-                                    <span style="font-size: 0.8rem; color: var(--footer-text);">
-                                        {{ c.fecha_creacion|date:"d M Y, H:i" }}
-                                    </span>
-                                </div>
-                            </div>
-                            
-                            {% if user == c.autor or user.is_superuser or user.perfil.rol == 'colaborador' %}
-                                <div style="font-size: 0.85rem;">
-                                    <a href="{% url 'editar_comentario' c.id %}" style="color: #007bff; text-decoration: none; margin-right: 10px; font-weight: 600;">
-                                        {% if user == c.autor %}Editar{% else %}Moderar{% endif %}
-                                    </a>
-                                    <a href="{% url 'eliminar_comentario' c.id %}" style="color: #dc3545; text-decoration: none; font-weight: 600;">
-                                        Eliminar
-                                    </a>
-                                </div>
-                            {% endif %}
-                        </div>
-                        
-                        <div style="line-height: 1.6; margin-left: 42px;">
-                            {{ c.contenido|linebreaks }}
-                        </div>
-                    </li>
-                {% endfor %}
-            </ul>
-        {% else %}
-            <p style="color: var(--footer-text); font-style: italic;">No hay comentarios aún.</p>
-        {% endif %}
-    </section>
-
-    <div style="margin-top: 3rem; text-align: center;">
-        <a href="{% url 'index' %}" style="display: inline-block; padding: 10px 20px; background: transparent; border: 1px solid var(--border-color); color: var(--text-color); border-radius: 50px; text-decoration: none; transition: background 0.2s;">
-            ← Volver al inicio
-        </a>
-    </div>
-
-</article>
+  // Función para obtener el CSRF token
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.substring(0, name.length + 1) === (name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+</script>
 {% endblock %}

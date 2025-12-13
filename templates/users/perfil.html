@@ -1,0 +1,456 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Perfil de Usuario - TodoDeporte{% endblock %}
+
+{% block content %}
+<div class="perfil-container">
+  <a href="{% url 'index' %}" class="back-link">
+    <svg viewBox="0 0 20 20" fill="currentColor">
+      <path d="M10 18l-8-8 8-8 1.5 1.5L5.5 9.5H18v2H5.5l6 6z" />
+    </svg>
+    Volver al inicio
+  </a>
+
+  <div class="perfil-header">
+    <div class="perfil-avatar-large">{{ usuario_perfil.username|slice:":1"|upper }}</div>
+    <h1>{{ usuario_perfil.username }}</h1>
+    <p class="perfil-info">
+      {% if usuario_perfil.email %}
+      <strong>Email:</strong> {{ usuario_perfil.email }}
+      {% endif %}
+      | <strong>Rol:</strong>
+      {% if usuario_perfil.is_superuser %}
+      Superadministrador
+      {% elif usuario_perfil.perfil %}
+      {{ usuario_perfil.perfil.get_rol_display }}
+      {% endif %}
+    </p>
+  </div>
+
+  <div class="perfil-content">
+    <div class="perfil-info-card">
+      <h2>
+        <svg viewBox="0 0 20 20" fill="currentColor">
+          <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+        </svg>
+        Información del Usuario
+      </h2>
+      
+      <div class="info-item">
+        <strong>Nombre de usuario:</strong>
+        <span>{{ usuario_perfil.username }}</span>
+      </div>
+      
+      {% if usuario_perfil.first_name %}
+      <div class="info-item">
+        <strong>Nombre:</strong>
+        <span>{{ usuario_perfil.first_name }}</span>
+      </div>
+      {% endif %}
+      
+      {% if usuario_perfil.last_name %}
+      <div class="info-item">
+        <strong>Apellido:</strong>
+        <span>{{ usuario_perfil.last_name }}</span>
+      </div>
+      {% endif %}
+      
+      <div class="info-item">
+        <strong>Email:</strong>
+        <span>{{ usuario_perfil.email|default:"No especificado" }}</span>
+      </div>
+      
+      <div class="info-item">
+        <strong>Rol:</strong>
+        {% if usuario_perfil.is_superuser %}
+        <span class="badge badge-super">
+          Superadministrador
+        </span>
+        {% elif usuario_perfil.perfil %}
+        <span class="badge badge-{{ usuario_perfil.perfil.rol }}">
+          {{ usuario_perfil.perfil.get_rol_display }}
+        </span>
+        {% endif %}
+      </div>
+      
+      {% if es_propio %}
+      <div class="perfil-actions">
+        <a href="{% url 'editar_perfil' %}" class="btn-submit">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M17.414 2.586a2 2 0 00-2.828 0L7 10.172V13h2.828l7.586-7.586a2 2 0 000-2.828z"/>
+            <path fill-rule="evenodd" d="M2 6a2 2 0 012-2h4a1 1 0 010 2H4v10h10v-4a1 1 0 112 0v4a2 2 0 01-2 2H4a2 2 0 01-2-2V6z" clip-rule="evenodd"/>
+          </svg>
+          Editar Perfil
+        </a>
+        <a href="{% url 'cambiar_password' %}" class="btn-submit btn-secondary">
+          <svg viewBox="0 0 20 20" fill="currentColor">
+            <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+          </svg>
+          Cambiar Contraseña
+        </a>
+      </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+<style>
+  .perfil-container {
+    max-width: 900px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+  }
+
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: var(--text-color);
+    text-decoration: none;
+    margin-bottom: 1.5rem;
+    font-weight: 500;
+    transition: color 0.2s;
+  }
+
+  .back-link:hover {
+    color: var(--header-bg);
+  }
+
+  .back-link svg {
+    width: 20px;
+    height: 20px;
+  }
+
+  .perfil-header {
+    background: linear-gradient(135deg, var(--header-bg) 0%, #0a5c00 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 16px 16px 0 0;
+    text-align: center;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  }
+
+  .perfil-avatar-large {
+    width: 100px;
+    height: 100px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    font-weight: 800;
+    color: white;
+    margin: 0 auto 1rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
+  }
+
+  .perfil-header h1 {
+    margin: 0;
+    font-size: 2rem;
+    font-weight: 700;
+  }
+
+  .perfil-info {
+    color: rgba(255, 255, 255, 0.95);
+    font-size: 1rem;
+    margin-top: 0.5rem;
+  }
+
+  .perfil-content {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 0 0 16px 16px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  }
+
+  body.dark-mode .perfil-content {
+    background: rgba(0, 0, 0, 0.3);
+  }
+
+  .perfil-info-card {
+    background: white;
+    padding: 2rem;
+    border-radius: 16px;
+    border: 1px solid #dee2e6;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+
+  body.dark-mode .perfil-info-card {
+    background: rgba(0, 0, 0, 0.3);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    box-shadow: none;
+  }
+
+  .perfil-info-card h2 {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1.5rem;
+    color: var(--text-color);
+    font-size: 1.5rem;
+  }
+
+  .perfil-info-card h2 svg {
+    width: 24px;
+    height: 24px;
+    color: var(--header-bg);
+  }
+
+  .info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1rem;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    margin-bottom: 0.75rem;
+  }
+
+  body.dark-mode .info-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+  }
+
+  .info-item strong {
+    color: #212529;
+    font-weight: 600;
+  }
+
+  body.dark-mode .info-item strong {
+    color: var(--text-color);
+  }
+
+  .info-item span {
+    color: #6c757d;
+  }
+
+  body.dark-mode .info-item span {
+    color: var(--footer-text);
+  }
+
+  .badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: transparent;
+    border: 3px solid;
+  }
+
+  .badge-administrador {
+    color: #dc3545;
+    border-color: #dc3545;
+  }
+
+  .badge-colaborador {
+    color: #ff8c00;
+    border-color: #ff8c00;
+  }
+
+  body.dark-mode .badge-colaborador {
+    color: #ffc107;
+    border-color: #ffc107;
+  }
+
+  .badge-miembro {
+    color: #0d6efd;
+    border-color: #0d6efd;
+  }
+
+  body.dark-mode .badge-miembro {
+    color: #0dcaf0;
+    border-color: #0dcaf0;
+  }
+
+  .badge-super {
+    color: #5a189a;
+    border-color: #5a189a;
+  }
+
+  body.dark-mode .badge-super {
+    color: #c77dff;
+    border-color: #c77dff;
+  }
+
+  .perfil-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 2rem;
+  }
+
+  .btn-submit {
+    flex: 1;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.875rem 1.5rem;
+    background: var(--header-bg);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-decoration: none;
+  }
+
+  .btn-submit:hover {
+    background: #0a5c00;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+
+  .btn-submit svg {
+    width: 18px;
+    height: 18px;
+  }
+
+  .btn-secondary {
+    background: #6c757d;
+  }
+
+  .btn-secondary:hover {
+    background: #5a6268;
+  }
+
+  @media (max-width: 768px) {
+    .perfil-container {
+      padding: 0 0.75rem;
+      margin: 1rem auto;
+    }
+
+    .perfil-header {
+      padding: 1.5rem 1rem;
+      border-radius: 12px 12px 0 0;
+    }
+
+    .perfil-avatar-large {
+      width: 80px;
+      height: 80px;
+      font-size: 2.5rem;
+    }
+
+    .perfil-header h1 {
+      font-size: 1.5rem;
+    }
+
+    .perfil-info {
+      font-size: 0.875rem;
+    }
+
+    .perfil-content {
+      padding: 1.5rem 1rem;
+      border-radius: 0 0 12px 12px;
+    }
+
+    .perfil-info-card {
+      padding: 1.25rem;
+      border-radius: 12px;
+    }
+
+    .perfil-info-card h2 {
+      font-size: 1.25rem;
+      margin-bottom: 1rem;
+    }
+
+    .info-item {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 0.5rem;
+      padding: 0.875rem;
+    }
+
+    .info-item strong {
+      font-size: 0.875rem;
+    }
+
+    .info-item span {
+      font-size: 0.875rem;
+      word-break: break-word;
+      width: 100%;
+    }
+
+    .badge {
+      padding: 0.375rem 0.875rem;
+      font-size: 0.8125rem;
+    }
+
+    .perfil-actions {
+      flex-direction: column;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+
+    .btn-submit {
+      padding: 0.75rem 1rem;
+      font-size: 0.9375rem;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .perfil-container {
+      padding: 0 0.5rem;
+      margin: 0.5rem auto;
+    }
+
+    .perfil-header {
+      padding: 1.25rem 0.875rem;
+    }
+
+    .perfil-avatar-large {
+      width: 70px;
+      height: 70px;
+      font-size: 2rem;
+      border-width: 3px;
+    }
+
+    .perfil-header h1 {
+      font-size: 1.25rem;
+    }
+
+    .perfil-info {
+      font-size: 0.8125rem;
+      display: flex;
+      flex-direction: column;
+      gap: 0.25rem;
+    }
+
+    .perfil-content {
+      padding: 1rem 0.75rem;
+    }
+
+    .perfil-info-card {
+      padding: 1rem;
+    }
+
+    .perfil-info-card h2 {
+      font-size: 1.125rem;
+    }
+
+    .perfil-info-card h2 svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .info-item {
+      padding: 0.75rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .btn-submit {
+      padding: 0.625rem 0.875rem;
+      font-size: 0.875rem;
+    }
+
+    .btn-submit svg {
+      width: 16px;
+      height: 16px;
+    }
+  }
+</style>
+{% endblock %}

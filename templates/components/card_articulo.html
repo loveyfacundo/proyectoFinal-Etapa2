@@ -1,19 +1,16 @@
-<li class="news-item improved-card">
-    <a href="{% url 'detalle_articulo' articulo.id %}" class="card-link">
-        
-        <div class="card-thumb">
-            {% if articulo.imagen_destacada %}
-            <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}">
-            {% endif %}
+<li class="news-item">
+    <div class="news-thumb">
+        {% if articulo.imagen_destacada %}
+        <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}"
+            style="width:100%; height:100%; object-fit:cover; border-radius:6px;">
+        {% endif %}
+    </div>
+    <div class="news-meta">
+        <div class="news-info">
+            {{ articulo.categoria.nombre }} • {{ articulo.fecha_creacion|date:"d M Y" }}
         </div>
-
-        <div class="card-body">
-            <h3 class="card-title">{{ articulo.titulo }}</h3>
-
-            <span class="card-meta">
-                {{ articulo.categoria.nombre }} • {{ articulo.fecha_creacion|date:"d M Y" }}
-            </span>
-        </div>
-
-    </a>
+        <a href="{% url 'detalle_articulo' articulo.id %}" class="news-title">
+            {{ articulo.titulo }}
+        </a>
+    </div>
 </li>

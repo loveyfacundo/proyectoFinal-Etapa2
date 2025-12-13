@@ -7,6 +7,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('nosotros/', views.about, name='about'),
     path('contacto/', views.contact, name='contact'),
+    path('terminos/', views.terms, name='terms'),
 
     # GESTIÓN DE ARTÍCULOS
     path('articulo/<int:id>/', views.detalle_articulo, name='detalle_articulo'),
@@ -21,13 +22,26 @@ urlpatterns = [
     # GESTIÓN DE CATEGORÍAS
     path('categoria/<int:categoria_id>/', views.listar_por_categoria, name='listar_por_categoria'),
 
-    # GESTIÓN DE USUARIOS (ADMIN)
+    # GESTIÓN DE USUARIOS (ADMINISTRADOR)
     path('gestion/usuarios/', views.gestion_usuarios, name='gestion_usuarios'),
+    
+    # GESTIÓN DE CATEGORÍAS (ADMINISTRADOR)
+    path('gestion/categorias/', views.gestion_categorias, name='gestion_categorias'),
+    path('gestion/categoria/crear/', views.crear_categoria, name='crear_categoria'),
+    path('gestion/categoria/editar/<int:id>/', views.editar_categoria, name='editar_categoria'),
+    path('gestion/categoria/eliminar/<int:id>/', views.eliminar_categoria, name='eliminar_categoria'),
 
-    # PERFIL DE USUARIO (las rutas específicas ANTES de las dinámicas)
+    # RUTAS DE AUTENTICACIÓN Y USUARIOS
+    path('registro/', views.registro, name='registro'),
+    path('login/', auth_views.LoginView.as_view(template_name='login.html'), name='login'),
+    path('logout/', auth_views.LogoutView.as_view(next_page='index'), name='logout'),
+    
+    # PERFIL DE USUARIO
     path('perfil/', views.perfil_usuario, name='perfil_usuario'),
-    path('perfil/editar/', views.editar_perfil, name='editar_perfil'),
+    path('perfil/editar/', views.editar_perfil_usuario, name='editar_perfil'),
     path('perfil/cambiar-password/', views.cambiar_password, name='cambiar_password'),
-    path('perfil/<str:username>/', views.perfil_usuario, name='perfil_usuario_publico'),
-
+    
+    # LISTA DE USUARIOS (ADMIN)
+    path('users/lista/', views.lista_usuarios, name='users_lista'),
 ]
+

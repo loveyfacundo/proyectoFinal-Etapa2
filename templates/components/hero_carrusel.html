@@ -1,4 +1,5 @@
 {% load static %}
+{% if destacados %}
 <section class="carrusel" aria-label="Noticias destacadas">
     <div class="carrusel-track">
 
@@ -9,31 +10,24 @@
             </svg>
         </button>
 
-        {# --- SLIDES --- #}
+        {# --- SLIDES con artículos destacados --- #}
         {% for articulo in destacados %}
         <div class="carrusel-slide {% if forloop.first %}active{% endif %}">
-            <a href="{% url 'detalle_articulo' articulo.id %}" style="display: block; width: 100%; height: 100%;">
+            <a href="{% url 'detalle_articulo' articulo.id %}" style="display: block; width: 100%; height: 100%; position: relative;">
                 {% if articulo.imagen_destacada %}
-                <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}">
+                <img src="{{ articulo.imagen_destacada.url }}" alt="{{ articulo.titulo }}" style="width: 100%; height: 100%; object-fit: cover;">
                 {% else %}
-                <img src="{% static 'img/hero-1.svg' %}" alt="Imagen por defecto">
+                <div style="width: 100%; height: 100%; background: linear-gradient(135deg, var(--header-bg) 0%, #0a5c00 100%); display: flex; align-items: center; justify-content: center;">
+                    <span style="font-size: 3rem; color: white; font-weight: 700;">{{ articulo.titulo|slice:":1"|upper }}</span>
+                </div>
                 {% endif %}
 
                 <div class="carrusel-caption"
-                    style="position: absolute; bottom: 40px; left: 20px; background: rgba(0,0,0,0.7); color: white; padding: 10px 20px; border-radius: 4px;">
-                    <h3>{{ articulo.titulo }}</h3>
+                    style="position: absolute; bottom: 40px; left: 20px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 15px 20px; border-radius: 8px; backdrop-filter: blur(10px);">
+                    <h3 style="margin: 0; font-size: 1.5rem; font-weight: 700;">{{ articulo.titulo }}</h3>
+                    <p style="margin: 0.5rem 0 0 0; font-size: 0.9rem; opacity: 0.9;">{{ articulo.categoria.nombre }}</p>
                 </div>
             </a>
-        </div>
-        {% empty %}
-        <div class="carrusel-slide active">
-            <img src="{% static 'img/hero-1.svg' %}" alt="Bienvenido a TodoDeporte">
-        </div>
-        <div class="carrusel-slide">
-            <img src="{% static 'img/hero-2.svg' %}" alt="Noticias al instante">
-        </div>
-        <div class="carrusel-slide">
-            <img src="{% static 'img/hero-3.svg' %}" alt="El mejor análisis">
         </div>
         {% endfor %}
 
@@ -48,12 +42,9 @@
         <div class="carrusel-dots" aria-hidden="true">
             {% for articulo in destacados %}
             <span class="dot {% if forloop.first %}active{% endif %}"></span>
-            {% empty %}
-            <span class="dot active"></span>
-            <span class="dot"></span>
-            <span class="dot"></span>
             {% endfor %}
         </div>
 
     </div>
 </section>
+{% endif %}

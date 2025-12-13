@@ -15,19 +15,20 @@ class Categoria(models.Model):
 
 
 class Perfil(models.Model):
-    USUARIO_ROLES = [
+    ROL_CHOICES = [
         ('miembro', 'Miembro'),
         ('colaborador', 'Colaborador'),
         ('administrador', 'Administrador'),
     ]
-    usuario = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil_blog')
-    rol = models.CharField(max_length=20, choices=USUARIO_ROLES, default='miembro')
+    
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='perfil')
+    rol = models.CharField(max_length=20, choices=ROL_CHOICES, default='miembro')
 
     class Meta:
         verbose_name_plural = "Perfiles"
 
     def __str__(self):
-        return f"{self.usuario.username} - {self.get_rol_display()}"
+        return f'{self.user.username} - {self.rol}'
     
     def es_administrador(self):
         """Verifica si el usuario tiene rol de administrador"""
@@ -40,6 +41,22 @@ class Perfil(models.Model):
     def puede_gestionar_usuarios(self):
         """Solo administradores pueden gestionar usuarios"""
         return self.rol == 'administrador'
+
+
+# Signals para crear perfil automáticamente
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+
+@receiver(post_save, sender=User)
+def crear_perfil(sender, instance, created, **kwargs):
+    if created:
+        Perfil.objects.create(user=instance)
+        print(f"Perfil creado automaticamente para {instance.username}")
+
+@receiver(post_save, sender=User)
+def guardar_perfil(sender, instance, **kwargs):
+    if hasattr(instance, 'perfil'):
+        instance.perfil.save()
 
 
 class Articulo(models.Model):

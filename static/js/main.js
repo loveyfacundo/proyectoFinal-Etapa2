@@ -1,32 +1,148 @@
 // Archivo JavaScript principal
 console.log("TodoDeporte cargado correctamente");
 
+// Auto-ocultar notificaciones después de 5 segundos
+(function autoHideMessages() {
+  const messages = document.querySelectorAll('.msg');
+  if (messages.length > 0) {
+    messages.forEach(msg => {
+      setTimeout(() => {
+        msg.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-20px)';
+        setTimeout(() => msg.remove(), 500);
+      }, 5000);
+    });
+  }
+})();
+
+// Menú móvil desplegable
+(function mobileMenu() {
+  const menuToggle = document.querySelector(".mobile-menu-toggle");
+  const mobileMenu = document.querySelector(".mobile-menu");
+  const body = document.body;
+
+  console.log("Menú móvil inicializado:", { menuToggle, mobileMenu });
+
+  if (!menuToggle || !mobileMenu) {
+    console.warn("No se encontraron elementos del menú móvil");
+    return;
+  }
+
+  const menuIcon = menuToggle.querySelector(".menu-icon use");
+
+  // Abrir/cerrar menú
+  menuToggle.addEventListener("click", () => {
+    const isOpen = mobileMenu.classList.contains("open");
+    mobileMenu.classList.toggle("open");
+    menuToggle.classList.toggle("open");
+    menuToggle.setAttribute("aria-expanded", String(!isOpen));
+    body.style.overflow = !isOpen ? "hidden" : "";
+
+    // Cambiar icono
+    if (menuIcon) {
+      const currentHref = menuIcon.getAttribute("href") || "";
+      const newIcon = !isOpen ? "#x" : "#menu";
+      menuIcon.setAttribute("href", currentHref.replace(/#(menu|x)/, newIcon));
+    }
+  });
+
+  // Cerrar menú al hacer clic fuera
+  mobileMenu.addEventListener("click", (e) => {
+    if (e.target === mobileMenu) {
+      mobileMenu.classList.remove("open");
+      menuToggle.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      body.style.overflow = "";
+
+      // Restaurar icono
+      if (menuIcon) {
+        const currentHref = menuIcon.getAttribute("href") || "";
+        menuIcon.setAttribute(
+          "href",
+          currentHref.replace(/#(menu|x)/, "#menu")
+        );
+      }
+    }
+  });
+
+  // Submenu toggle
+  const dropdownToggles = document.querySelectorAll(".mobile-dropdown-toggle");
+  dropdownToggles.forEach((toggle) => {
+    toggle.addEventListener("click", (e) => {
+      e.preventDefault();
+      const parent = toggle.closest(".mobile-dropdown");
+      const isOpen = parent.classList.contains("open");
+
+      // Cerrar otros submenus
+      document.querySelectorAll(".mobile-dropdown.open").forEach((dd) => {
+        if (dd !== parent) dd.classList.remove("open");
+      });
+
+      parent.classList.toggle("open", !isOpen);
+    });
+  });
+
+  // Cerrar menú al hacer clic en un enlace
+  const mobileLinks = mobileMenu.querySelectorAll(
+    ".mobile-nav-link:not(.mobile-dropdown-toggle), .mobile-submenu-link"
+  );
+  mobileLinks.forEach((link) => {
+    link.addEventListener("click", () => {
+      mobileMenu.classList.remove("open");
+      menuToggle.classList.remove("open");
+      menuToggle.setAttribute("aria-expanded", "false");
+      body.style.overflow = "";
+
+      // Restaurar icono
+      if (menuIcon) {
+        const currentHref = menuIcon.getAttribute("href") || "";
+        menuIcon.setAttribute(
+          "href",
+          currentHref.replace(/#(menu|x)/, "#menu")
+        );
+      }
+    });
+  });
+})();
+
 // Alternador de tema - Modo oscuro/claro
 (function themeToggle() {
   const body = document.body;
-  const toggle = document.querySelector(".theme-toggle");
-  const icon = toggle?.querySelector(".theme-icon use");
+  const toggles = document.querySelectorAll(".theme-toggle");
 
   // Cargar tema guardado
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark") {
     body.classList.add("dark-mode");
-    icon?.setAttribute(
-      "href",
-      icon.getAttribute("href").replace("#sun", "#moon")
-    );
+    toggles.forEach(toggle => {
+      const icon = toggle.querySelector(".theme-icon use");
+      if (icon) {
+        icon.setAttribute(
+          "href",
+          icon.getAttribute("href").replace("#sun", "#moon")
+        );
+      }
+    });
   }
 
-  // Manejador del alternador
-  toggle?.addEventListener("click", () => {
-    body.classList.toggle("dark-mode");
-    const isDark = body.classList.contains("dark-mode");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
+  // Manejador del alternador para todos los botones
+  toggles.forEach(toggle => {
+    toggle.addEventListener("click", () => {
+      body.classList.toggle("dark-mode");
+      const isDark = body.classList.contains("dark-mode");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
 
-    // Actualizar icono
-    const currentHref = icon?.getAttribute("href") || "";
-    const newIcon = isDark ? "#moon" : "#sun";
-    icon?.setAttribute("href", currentHref.replace(/#(sun|moon)/, newIcon));
+      // Actualizar icono en TODOS los botones de tema
+      toggles.forEach(btn => {
+        const icon = btn.querySelector(".theme-icon use");
+        if (icon) {
+          const currentHref = icon.getAttribute("href") || "";
+          const newIcon = isDark ? "#moon" : "#sun";
+          icon.setAttribute("href", currentHref.replace(/#(sun|moon)/, newIcon));
+        }
+      });
+    });
   });
 })();
 
