@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Gestión de Usuarios - TodoDeporte{% endblock %}
+
+{% block content %}
+<div class="gestion-container">
+    <div class="gestion-header">
+        <h1>👥 Gestión de Usuarios</h1>
+        <p>Administra los roles y permisos de los usuarios</p>
+    </div>
+
+    {% if usuarios %}
+        <table class="usuarios-tabla">
+            <thead>
+                <tr>
+                    <th>Usuario</th>
+                    <th>Email</th>
+                    <th>Rol Actual</th>
+                    <th>Cambiar Rol</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for usuario in usuarios %}
+                    {% with perfil=usuario.perfil_users %}
+                        <tr {% if request.user.id == usuario.id %}class="current-user"{% endif %}>
+
+                            <td class="usuario-info">{{ usuario.username }}</td>
+                            <td>{{ usuario.email }}</td>
+
+                            <td>
+                                {% if usuario.is_superuser %}
+                                    <span class="rol-actual superuser">👑 Superusuario</span>
+                                {% else %}
+                                    {% if perfil and perfil.rol == 'administrador' %}
+                                        <span class="rol-actual">🔐 Administrador</span>
+                                    {% elif perfil and perfil.rol == 'colaborador' %}
+                                        <span class="rol-actual">✏️ Colaborador</span>
+                                    {% else %}
+                                        <span class="rol-actual">👤 Miembro</span>
+                                    {% endif %}
+                                {% endif %}
+                            </td>
+
+                            <td>
+                                {% if usuario.is_superuser %}
+                                    <span style="color: #999; font-size: 0.9rem;">No se puede modificar</span>
+                                {% else %}
+                                    <form method="POST" class="rol-form">
+                                        {% csrf_token %}
+                                        <input type="hidden" name="usuario_id" value="{{ usuario.id }}">
+
+                                        <select name="rol">
+                                            <option value="">-- Seleccionar rol --</option>
+                                            {% for valor, etiqueta in roles_disponibles %}
+                                                <option value="{{ valor }}"
+                                                    {% if perfil and perfil.rol == valor %}selected{% endif %}>
+                                                    {{ etiqueta }}
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+
+                                        <button type="submit">Actualizar</button>
+                                    </form>
+                                {% endif %}
+                            </td>
+
+                        </tr>
+                    {% endwith %}
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="acciones-gestion">
+            <a href="{% url 'users_lista' %}">📋 Ver lista de usuarios</a>
+        </div>
+
+    {% else %}
+        <div class="no-usuarios">
+            <p>No hay usuarios registrados en el sistema.</p>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
