@@ -43,22 +43,6 @@ class Perfil(models.Model):
         return self.rol == 'administrador'
 
 
-# Signals para crear perfil automáticamente
-from django.db.models.signals import post_save
-from django.dispatch import receiver
-
-@receiver(post_save, sender=User)
-def crear_perfil(sender, instance, created, **kwargs):
-    if created:
-        Perfil.objects.create(user=instance)
-        print(f"Perfil creado automaticamente para {instance.username}")
-
-@receiver(post_save, sender=User)
-def guardar_perfil(sender, instance, **kwargs):
-    if hasattr(instance, 'perfil'):
-        instance.perfil.save()
-
-
 class Articulo(models.Model):
     titulo = models.CharField(max_length=200)
     contenido = models.TextField()
