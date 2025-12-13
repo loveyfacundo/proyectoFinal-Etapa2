@@ -4,6 +4,158 @@
 {% block title %}Editar Perfil - TodoDeporte{% endblock %}
 
 {% block content %}
+<div class="perfil-container">
+    <a href="{% url 'index' %}" class="back-link">
+        <svg viewBox="0 0 20 20" fill="currentColor">
+            <path d="M10 18l-8-8 8-8 1.5 1.5L5.5 9.5H18v2H5.5l6 6z"/>
+        </svg>
+        Volver al inicio
+    </a>
+
+    <div class="perfil-header">
+        <div class="perfil-avatar-large">
+            {{ user.username|slice:":1"|upper }}
+        </div>
+        <h1>{{ user.username }}</h1>
+        <p class="perfil-info">
+            {% if user.email %}
+                <strong>Email:</strong> {{ user.email }}
+            {% endif %}
+            {% if user.perfil %}
+                | <strong>Rol:</strong> {{ user.perfil.get_rol_display }}
+            {% endif %}
+        </p>
+    </div>
+
+    <div class="forms-grid">
+        <!-- Formulario de Datos del Perfil -->
+        <div class="form-section">
+            <h2>
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
+                </svg>
+                Datos del Perfil
+            </h2>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_username" class="form-label">{{ form_perfil.username.label }}</label>
+                    {{ form_perfil.username }}
+                    {% if form_perfil.username.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_perfil.username.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_first_name" class="form-label">{{ form_perfil.first_name.label }}</label>
+                    {{ form_perfil.first_name }}
+                    {% if form_perfil.first_name.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_perfil.first_name.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_last_name" class="form-label">{{ form_perfil.last_name.label }}</label>
+                    {{ form_perfil.last_name }}
+                    {% if form_perfil.last_name.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_perfil.last_name.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="email-info-box">
+                    <strong>Correo Electrónico:</strong> {{ user.email }}
+                    <p class="email-note">El correo electrónico no se puede modificar por seguridad.</p>
+                </div>
+
+                <button type="submit" name="guardar_perfil" class="btn-submit">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
+                    </svg>
+                    Guardar Cambios
+                </button>
+            </form>
+        </div>
+
+        <!-- Formulario de Cambio de Contraseña -->
+        <div class="form-section">
+            <h2>
+                <svg viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                </svg>
+                Cambiar Contraseña
+            </h2>
+            <form method="post">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <label for="id_old_password" class="form-label">{{ form_password.old_password.label }}</label>
+                    {{ form_password.old_password }}
+                    {% if form_password.old_password.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_password.old_password.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_new_password1" class="form-label">{{ form_password.new_password1.label }}</label>
+                    {{ form_password.new_password1 }}
+                    {% if form_password.new_password1.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_password.new_password1.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="form-group">
+                    <label for="id_new_password2" class="form-label">{{ form_password.new_password2.label }}</label>
+                    {{ form_password.new_password2 }}
+                    {% if form_password.new_password2.errors %}
+                        <ul class="errorlist">
+                            {% for error in form_password.new_password2.errors %}
+                                <li>{{ error }}</li>
+                            {% endfor %}
+                        </ul>
+                    {% endif %}
+                </div>
+
+                <div class="password-help">
+                    <h4>Requisitos de la contraseña:</h4>
+                    <ul>
+                        <li>Mínimo 8 caracteres</li>
+                        <li>No puede ser solo numérica</li>
+                        <li>No puede ser muy común</li>
+                    </ul>
+                </div>
+
+                <button type="submit" name="cambiar_password" class="btn-submit btn-danger">
+                    <svg viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
+                    </svg>
+                    Cambiar Contraseña
+                </button>
+            </form>
+        </div>
+    </div>
+</div>
+
 <style>
     .perfil-container {
         max-width: 900px;
@@ -408,156 +560,4 @@
         }
     }
 </style>
-
-<div class="perfil-container">
-    <a href="{% url 'index' %}" class="back-link">
-        <svg viewBox="0 0 20 20" fill="currentColor">
-            <path d="M10 18l-8-8 8-8 1.5 1.5L5.5 9.5H18v2H5.5l6 6z"/>
-        </svg>
-        Volver al inicio
-    </a>
-
-    <div class="perfil-header">
-        <div class="perfil-avatar-large">
-            {{ user.username|slice:":1"|upper }}
-        </div>
-        <h1>{{ user.username }}</h1>
-        <p class="perfil-info">
-            {% if user.email %}
-                <strong>Email:</strong> {{ user.email }}
-            {% endif %}
-            {% if user.perfil %}
-                | <strong>Rol:</strong> {{ user.perfil.get_rol_display }}
-            {% endif %}
-        </p>
-    </div>
-
-    <div class="forms-grid">
-        <!-- Formulario de Datos del Perfil -->
-        <div class="form-section">
-            <h2>
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                </svg>
-                Datos del Perfil
-            </h2>
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="form-group">
-                    <label for="id_username" class="form-label">{{ form_perfil.username.label }}</label>
-                    {{ form_perfil.username }}
-                    {% if form_perfil.username.errors %}
-                        <ul class="errorlist">
-                            {% for error in form_perfil.username.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_first_name" class="form-label">{{ form_perfil.first_name.label }}</label>
-                    {{ form_perfil.first_name }}
-                    {% if form_perfil.first_name.errors %}
-                        <ul class="errorlist">
-                            {% for error in form_perfil.first_name.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_last_name" class="form-label">{{ form_perfil.last_name.label }}</label>
-                    {{ form_perfil.last_name }}
-                    {% if form_perfil.last_name.errors %}
-                        <ul class="errorlist">
-                            {% for error in form_perfil.last_name.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="email-info-box">
-                    <strong>Correo Electrónico:</strong> {{ user.email }}
-                    <p class="email-note">El correo electrónico no se puede modificar por seguridad.</p>
-                </div>
-
-                <button type="submit" name="guardar_perfil" class="btn-submit">
-                    <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path d="M7.707 10.293a1 1 0 10-1.414 1.414l3 3a1 1 0 001.414 0l3-3a1 1 0 00-1.414-1.414L11 11.586V6h5a2 2 0 012 2v7a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h5v5.586l-1.293-1.293zM9 4a1 1 0 012 0v2H9V4z"/>
-                    </svg>
-                    Guardar Cambios
-                </button>
-            </form>
-        </div>
-
-        <!-- Formulario de Cambio de Contraseña -->
-        <div class="form-section">
-            <h2>
-                <svg viewBox="0 0 20 20" fill="currentColor">
-                    <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                </svg>
-                Cambiar Contraseña
-            </h2>
-            <form method="post">
-                {% csrf_token %}
-                
-                <div class="form-group">
-                    <label for="id_old_password" class="form-label">{{ form_password.old_password.label }}</label>
-                    {{ form_password.old_password }}
-                    {% if form_password.old_password.errors %}
-                        <ul class="errorlist">
-                            {% for error in form_password.old_password.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_new_password1" class="form-label">{{ form_password.new_password1.label }}</label>
-                    {{ form_password.new_password1 }}
-                    {% if form_password.new_password1.errors %}
-                        <ul class="errorlist">
-                            {% for error in form_password.new_password1.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="form-group">
-                    <label for="id_new_password2" class="form-label">{{ form_password.new_password2.label }}</label>
-                    {{ form_password.new_password2 }}
-                    {% if form_password.new_password2.errors %}
-                        <ul class="errorlist">
-                            {% for error in form_password.new_password2.errors %}
-                                <li>{{ error }}</li>
-                            {% endfor %}
-                        </ul>
-                    {% endif %}
-                </div>
-
-                <div class="password-help">
-                    <h4>Requisitos de la contraseña:</h4>
-                    <ul>
-                        <li>Mínimo 8 caracteres</li>
-                        <li>No puede ser solo numérica</li>
-                        <li>No puede ser muy común</li>
-                    </ul>
-                </div>
-
-                <button type="submit" name="cambiar_password" class="btn-submit btn-danger">
-                    <svg viewBox="0 0 20 20" fill="currentColor">
-                        <path fill-rule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clip-rule="evenodd"/>
-                    </svg>
-                    Cambiar Contraseña
-                </button>
-            </form>
-        </div>
-    </div>
-</div>
 {% endblock %}

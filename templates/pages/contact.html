@@ -11,17 +11,6 @@
         <p>¿Tienes alguna duda o sugerencia? <br>Completa el formulario y te responderemos pronto.</p>
     </div>
 
-    {# Área de Notificaciones #}
-    {% if messages %}
-        <div class="msg-container">
-            {% for message in messages %}
-                <div class="msg {% if 'success' in message.tags %}msg-success{% else %}msg-error{% endif %}">
-                    {{ message }}
-                </div>
-            {% endfor %}
-        </div>
-    {% endif %}
-
     <form method="post">
         {% csrf_token %}
         

@@ -3,8 +3,108 @@
 {% block title %}Nosotros - TodoDeporte{% endblock %}
 
 {% block content %}
-    <section style="background: var(--card-bg); padding: 2rem; border-radius: 8px;">
-        <h2>Acerca de TodoDeporte</h2>
-        <p>Somos una comunidad apasionada por el deporte...</p>
-        </section>
+    <!-- Sección Acerca de TodoDeporte -->
+    <section style="background: var(--card-bg); padding: 3rem 2rem; border-radius: 12px; margin-bottom: 3rem; box-shadow: 0 4px 12px var(--card-shadow);">
+        <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem; color: var(--title-color);">Acerca de TodoDeporte</h2>
+        
+        <div style="max-width: 900px; margin: 0 auto;">
+            <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; color: var(--text-color);">
+                Somos una comunidad apasionada por el deporte que busca conectar a entusiastas, atletas y aficionados 
+                a través de contenido de calidad. TodoDeporte nació con la misión de crear un espacio digital donde 
+                el deporte es el protagonista y cada historia merece ser contada.
+            </p>
+            
+            <p style="font-size: 1.1rem; line-height: 1.8; margin-bottom: 1.5rem; text-align: justify; color: var(--text-color);">
+                Nuestra plataforma ofrece artículos, noticias y análisis sobre diversas disciplinas deportivas, 
+                desde fútbol, básquetbol y tenis hasta deportes emergentes y actividades fitness. Creemos en el 
+                poder del deporte para inspirar, unir y transformar vidas.
+            </p>
+            
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 3rem;">
+                <div style="text-align: center; padding: 1.5rem; background: var(--bg-color); border-radius: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="color: var(--link-color); margin-bottom: 1rem; font-size: 1.4rem;">🎯 Nuestra Misión</h3>
+                    <p style="line-height: 1.6; color: var(--text-color);">
+                        Proporcionar contenido deportivo de calidad que informe, entretenga e inspire a nuestra comunidad.
+                    </p>
+                </div>
+                
+                <div style="text-align: center; padding: 1.5rem; background: var(--bg-color); border-radius: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="color: var(--link-color); margin-bottom: 1rem; font-size: 1.4rem;">🚀 Nuestra Visión</h3>
+                    <p style="line-height: 1.6; color: var(--text-color);">
+                        Ser la plataforma de referencia para los amantes del deporte en la región, fomentando la pasión deportiva.
+                    </p>
+                </div>
+                
+                <div style="text-align: center; padding: 1.5rem; background: var(--bg-color); border-radius: 8px; transition: transform 0.3s ease;" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+                    <h3 style="color: var(--link-color); margin-bottom: 1rem; font-size: 1.4rem;">💪 Nuestros Valores</h3>
+                    <p style="line-height: 1.6; color: var(--text-color);">
+                        Pasión, compromiso, integridad y respeto por el deporte y nuestra comunidad.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección Conocé al Equipo -->
+    <section style="background: var(--bg-color); padding: 3rem 2rem; border-radius: 12px; margin-bottom: 3rem;">
+        <h2 style="text-align: center; margin-bottom: 2rem; font-size: 2.5rem; color: var(--title-color);">Conocé al Equipo</h2>
+        <p style="text-align: center; color: var(--text-color); margin-bottom: 2.5rem; font-size: 1.05rem;">El equipo detrás de TodoDeporte</p>
+        
+        <div style="max-width: 700px; margin: 0 auto; background: var(--card-bg); padding: 2rem 2rem; border-radius: 12px; border-left: 5px solid var(--link-color); box-shadow: 0 4px 12px var(--card-shadow);">
+            <div style="display: grid; gap: 1rem;">
+                <div style="display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='var(--bg-color)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #108600, #22c55e); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; font-weight: bold; margin-right: 1.2rem; flex-shrink: 0;">
+                        FL
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--title-color);">Facundo Lovey</h3>
+                        <p style="margin: 0.3rem 0 0 0; color: var(--text-color); font-size: 0.9rem;">💻 Programador</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='var(--bg-color)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #108600, #22c55e); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; font-weight: bold; margin-right: 1.2rem; flex-shrink: 0;">
+                        AM
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--title-color);">Alejandro Martinez</h3>
+                        <p style="margin: 0.3rem 0 0 0; color: var(--text-color); font-size: 0.9rem;">💻 Programador</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; padding: 1rem; border-bottom: 1px solid var(--border-color); transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='var(--bg-color)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #108600, #22c55e); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; font-weight: bold; margin-right: 1.2rem; flex-shrink: 0;">
+                        DC
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--title-color);">Dihué De Cuadra</h3>
+                        <p style="margin: 0.3rem 0 0 0; color: var(--text-color); font-size: 0.9rem;">💻 Programador</p>
+                    </div>
+                </div>
+                
+                <div style="display: flex; align-items: center; padding: 1rem; transition: background-color 0.3s ease;" onmouseover="this.style.backgroundColor='var(--bg-color)'" onmouseout="this.style.backgroundColor='transparent'">
+                    <div style="width: 50px; height: 50px; background: linear-gradient(135deg, #108600, #22c55e); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 1.2rem; font-weight: bold; margin-right: 1.2rem; flex-shrink: 0;">
+                        JC
+                    </div>
+                    <div>
+                        <h3 style="margin: 0; font-size: 1.15rem; color: var(--title-color);">José Centurión</h3>
+                        <p style="margin: 0.3rem 0 0 0; color: var(--text-color); font-size: 0.9rem;">💻 Programador</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Sección de Contacto -->
+    <section style="background: linear-gradient(135deg, #108600 0%, #0a5c00 100%); padding: 4rem 2rem; border-radius: 12px; text-align: center; color: white; box-shadow: 0 10px 30px var(--card-shadow);">
+        <h2 style="font-size: 2.2rem; margin-bottom: 1rem; color: white; font-weight: 700;">¿Tenés algo que contarnos?</h2>
+        <p style="font-size: 1.2rem; margin-bottom: 2.5rem; opacity: 0.95; max-width: 700px; margin-left: auto; margin-right: auto;">
+            Nos encantaría escucharte. Envianos tus comentarios, sugerencias o colaboraciones.
+        </p>
+        <a href="{% url 'contact' %}" style="display: inline-block; background: white; color: #108600; padding: 1.2rem 3.5rem; border-radius: 50px; text-decoration: none; font-weight: bold; font-size: 1.1rem; transition: transform 0.3s ease, box-shadow 0.3s ease, background-color 0.3s ease;" 
+           onmouseover="this.style.transform='translateY(-3px)'; this.style.boxShadow='0 8px 20px rgba(0,0,0,0.3)'; this.style.backgroundColor='#f0f0f0';" 
+           onmouseout="this.style.transform='translateY(0)'; this.style.boxShadow='none'; this.style.backgroundColor='white';">
+            📧 Contáctanos
+        </a>
+    </section>
 {% endblock %}

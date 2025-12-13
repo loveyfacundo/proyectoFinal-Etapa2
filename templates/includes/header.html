@@ -2,12 +2,11 @@
 <header>
   <div class="header-bar">
     <h1 class="header-title">TodoDeporte</h1>
-    
-    {# Contenedor de botones para móvil #}
-    <div class="header-actions">
-      {# Botón Tema - visible en móvil y desktop #}
+
+    {# Botones para móvil - tema y menú hamburguesa #}
+    <div class="mobile-actions">
       <button
-        class="theme-toggle"
+        class="theme-toggle mobile-theme-toggle"
         aria-label="Cambiar tema"
         title="Cambiar tema"
       >
@@ -15,15 +14,18 @@
           <use href="{% static 'img/icons.svg' %}#sun"></use>
         </svg>
       </button>
-      
-      {# Botón hamburguesa para móvil #}
-      <button class="mobile-menu-toggle" aria-label="Abrir menú" aria-expanded="false">
+
+      <button
+        class="mobile-menu-toggle"
+        aria-label="Abrir menú"
+        aria-expanded="false"
+      >
         <svg class="icon icon-md menu-icon" aria-hidden="true">
           <use href="{% static 'img/icons.svg' %}#menu"></use>
         </svg>
       </button>
     </div>
-    
+
     <nav class="nav" aria-label="Principal">
       <ul class="nav-links">
         <li class="nav-link">
@@ -73,7 +75,7 @@
         </li>
       </ul>
     </nav>
-    
+
     {# Menú móvil desplegable #}
     <div class="mobile-menu" aria-label="Menú de navegación móvil">
       <div class="mobile-menu-content">
@@ -86,9 +88,12 @@
               <span>Inicio</span>
             </a>
           </li>
-          
+
           <li class="mobile-nav-item mobile-dropdown">
-            <button class="mobile-nav-link mobile-dropdown-toggle" type="button">
+            <button
+              class="mobile-nav-link mobile-dropdown-toggle"
+              type="button"
+            >
               <svg class="icon icon-sm" aria-hidden="true">
                 <use href="{% static 'img/icons.svg' %}#trophy"></use>
               </svg>
@@ -100,16 +105,21 @@
             <ul class="mobile-submenu">
               {% for cat in categorias_globales %}
               <li>
-                <a href="{% url 'listar_por_categoria' cat.id %}" class="mobile-submenu-link">
+                <a
+                  href="{% url 'listar_por_categoria' cat.id %}"
+                  class="mobile-submenu-link"
+                >
                   {{ cat.nombre }}
                 </a>
               </li>
               {% empty %}
-              <li><a href="#" class="mobile-submenu-link">Sin categorías</a></li>
+              <li>
+                <a href="#" class="mobile-submenu-link">Sin categorías</a>
+              </li>
               {% endfor %}
             </ul>
           </li>
-          
+
           <li class="mobile-nav-item">
             <a href="{% url 'about' %}" class="mobile-nav-link">
               <svg class="icon icon-sm" aria-hidden="true">
@@ -118,7 +128,7 @@
               <span>Acerca de</span>
             </a>
           </li>
-          
+
           <li class="mobile-nav-item">
             <a href="{% url 'contact' %}" class="mobile-nav-link">
               <svg class="icon icon-sm" aria-hidden="true">
@@ -127,9 +137,9 @@
               <span>Contacto</span>
             </a>
           </li>
-          
+
           <li class="mobile-nav-divider"></li>
-          
+
           {% if user.is_authenticated %}
             {% if user.is_superuser or user.perfil.rol == 'colaborador' or user.perfil.rol == 'administrador' %}
             <li class="mobile-nav-item">
@@ -143,67 +153,80 @@
             {% endif %}
             
             {% if user.is_superuser or user.perfil.rol == 'administrador' %}
-            <li class="mobile-nav-item">
-              <a href="{% url 'gestion_usuarios' %}" class="mobile-nav-link">
+          <li class="mobile-nav-item">
+            <a href="{% url 'gestion_usuarios' %}" class="mobile-nav-link">
+              <svg class="icon icon-sm" aria-hidden="true">
+                <use href="{% static 'img/icons.svg' %}#user"></use>
+              </svg>
+              <span>Gestionar Usuarios</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item">
+            <a href="{% url 'gestion_categorias' %}" class="mobile-nav-link">
+              <svg class="icon icon-sm" aria-hidden="true">
+                <use href="{% static 'img/icons.svg' %}#tag"></use>
+              </svg>
+              <span>Gestionar Categorías</span>
+            </a>
+          </li>
+          {% endif %}
+
+          <li class="mobile-nav-item">
+            <a href="{% url 'editar_perfil' %}" class="mobile-nav-link">
+              <svg class="icon icon-sm" aria-hidden="true">
+                <use href="{% static 'img/icons.svg' %}#user"></use>
+              </svg>
+              <span>Mi Perfil</span>
+            </a>
+          </li>
+
+          <li class="mobile-nav-item">
+            <form action="{% url 'logout' %}" method="post" style="width: 100%">
+              {% csrf_token %}
+              <button type="submit" class="mobile-nav-link mobile-logout">
                 <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#user"></use>
+                  <use href="{% static 'img/icons.svg' %}#logout"></use>
                 </svg>
-                <span>Gestionar Usuarios</span>
-              </a>
-            </li>
-            <li class="mobile-nav-item">
-              <a href="{% url 'gestion_categorias' %}" class="mobile-nav-link">
-                <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#tag"></use>
-                </svg>
-                <span>Gestionar Categorías</span>
-              </a>
-            </li>
-            {% endif %}
-            
-            <li class="mobile-nav-item">
-              <a href="{% url 'editar_perfil' %}" class="mobile-nav-link">
-                <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#user"></use>
-                </svg>
-                <span>Mi Perfil</span>
-              </a>
-            </li>
-            
-            <li class="mobile-nav-item">
-              <form action="{% url 'logout' %}" method="post" style="width: 100%;">
-                {% csrf_token %}
-                <button type="submit" class="mobile-nav-link mobile-logout">
-                  <svg class="icon icon-sm" aria-hidden="true">
-                    <use href="{% static 'img/icons.svg' %}#logout"></use>
-                  </svg>
-                  <span>Cerrar Sesión</span>
-                </button>
-              </form>
-            </li>
+                <span>Cerrar Sesión</span>
+              </button>
+            </form>
+          </li>
           {% else %}
-            <li class="mobile-nav-item">
-              <a href="{% url 'login' %}" class="mobile-nav-link">
-                <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#login"></use>
-                </svg>
-                <span>Iniciar Sesión</span>
-              </a>
-            </li>
-            <li class="mobile-nav-item">
-              <a href="{% url 'registro' %}" class="mobile-nav-link">
-                <svg class="icon icon-sm" aria-hidden="true">
-                  <use href="{% static 'img/icons.svg' %}#user"></use>
-                </svg>
-                <span>Registrarse</span>
-              </a>
-            </li>
+          <li class="mobile-nav-item">
+            <a href="{% url 'login' %}" class="mobile-nav-link">
+              <svg class="icon icon-sm" aria-hidden="true">
+                <use href="{% static 'img/icons.svg' %}#login"></use>
+              </svg>
+              <span>Iniciar Sesión</span>
+            </a>
+          </li>
+          <li class="mobile-nav-item">
+            <a href="{% url 'registro' %}" class="mobile-nav-link">
+              <svg class="icon icon-sm" aria-hidden="true">
+                <use href="{% static 'img/icons.svg' %}#user"></use>
+              </svg>
+              <span>Registrarse</span>
+            </a>
+          </li>
           {% endif %}
         </ul>
       </div>
     </div>
 
-    <div class="profile-menu">
+    {# Contenedor para botones de tema y perfil #}
+    <div class="header-left-elements" style="display: flex; align-items: center;">
+      {# Botón de cambio de tema - visible en desktop #}
+      <button
+        class="theme-toggle"
+        aria-label="Cambiar tema"
+        title="Cambiar tema"
+      >
+        <svg class="icon icon-md theme-icon" aria-hidden="true">
+          <use href="{% static 'img/icons.svg' %}#sun"></use>
+        </svg>
+      </button>
+
+      <div class="profile-menu">
       {# --- Botón de Perfil con Menú Desplegable --- #}
       <button
         class="profile-button profile-toggle"
@@ -216,7 +239,10 @@
             <use href="{% static 'img/icons.svg' %}#user"></use>
           </svg>
         </div>
-        <span class="profile-username">{% if user.is_authenticated %}{{ user.first_name|default:user.username }}{% else %}Iniciar Sesión{% endif %}</span>
+        <span class="profile-username"
+          >{% if user.is_authenticated %}{{ user.username }}{% else %}Iniciar
+          Sesión{% endif %}</span
+        >
       </button>
 
       <div class="profile-dropdown" aria-label="Opciones de usuario">
@@ -224,23 +250,40 @@
         <div class="profile-menu-logged">
           {% if user.is_superuser or user.perfil.rol == 'colaborador' or user.perfil.rol == 'administrador' %}
           <a href="{% url 'crear_articulo' %}" class="profile-item">
-            <img src="{% static 'img/plus_add_insert_icon_183799.svg' %}" alt="Crear" class="menu-icon-svg">
+            <img
+              src="{% static 'img/plus_add_insert_icon_183799.svg' %}"
+              alt="Crear"
+              class="menu-icon-svg"
+            />
             <span>Crear Artículo</span>
           </a>
           {% endif %}
+          
           {% if user.is_superuser or user.perfil.rol == 'administrador' %}
           <a href="{% url 'gestion_usuarios' %}" class="profile-item">
-            <img src="{% static 'img/user_icon_183752.svg' %}" alt="Usuarios" class="menu-icon-svg">
+            <img
+              src="{% static 'img/user_icon_183752.svg' %}"
+              alt="Usuarios"
+              class="menu-icon-svg"
+            />
             <span>Gestionar Usuarios</span>
           </a>
           <a href="{% url 'gestion_categorias' %}" class="profile-item">
-            <img src="{% static 'img/category_icon_183800.svg' %}" alt="Categorías" class="menu-icon-svg">
+            <img
+              src="{% static 'img/category_icon_183800.svg' %}"
+              alt="Categorías"
+              class="menu-icon-svg"
+            />
             <span>Gestionar Categorías</span>
           </a>
           {% endif %}
 
           <a href="{% url 'editar_perfil' %}" class="profile-item">
-            <img src="{% static 'img/profile_icon_183761.svg' %}" alt="Perfil" class="menu-icon-svg">
+            <img
+              src="{% static 'img/profile_icon_183761.svg' %}"
+              alt="Perfil"
+              class="menu-icon-svg"
+            />
             <span>Mi Perfil</span>
           </a>
 
@@ -285,6 +328,7 @@
           </a>
         </div>
         {% endif %}
+      </div>
       </div>
     </div>
   </div>

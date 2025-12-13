@@ -45,13 +45,31 @@
 
         {# Barra lateral de categorías #}
         <aside class="home-column">
-            <h2>Categorías Populares</h2>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem;">
+                <h2 style="margin: 0;">Categorías Populares</h2>
+                {% if categoria_seleccionada %}
+                    <a href="{% url 'index' %}" style="font-size: 0.85rem; color: var(--link-color); text-decoration: none; font-weight: 600;">
+                        Ver todas
+                    </a>
+                {% endif %}
+            </div>
             <ul class="category-list">
                 {% for cat in categorias %}
-                    <li><a href="#">{{ cat.nombre }}</a></li>
+                    <li class="{% if categoria_seleccionada.id == cat.id %}active{% endif %}" data-position="{{ forloop.counter }}">
+                        <a href="{% url 'listar_por_categoria' cat.id %}">
+                            <span class="category-name">{{ cat.nombre }}</span>
+                            <span class="category-stats">
+                                <span class="stat-item stat-articles">{{ cat.total_articulos }} art.</span>
+                                <span class="stat-item stat-comments">{{ cat.total_comentarios }} com.</span>
+                            </span>
+                        </a>
+                    </li>
+                {% empty %}
+                    <li style="padding: 1rem; text-align: center; color: var(--footer-text);">
+                        No hay categorías disponibles
+                    </li>
                 {% endfor %}
             </ul>
-            <div class="category-promo"></div>
         </aside>
     </section>
 {% endblock %}

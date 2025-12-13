@@ -29,6 +29,7 @@ from .models import (
 )
 
 from .forms import ContactoForm
+from django.db.models import Count
 
 def index(request):
     orden = request.GET.get('orden', 'reciente')
@@ -48,13 +49,56 @@ def index(request):
     else:
         ultimas_noticias = Articulo.objects.order_by(campo_orden)
 
+    # Obtener categorías populares ordenadas por cantidad de artículos y comentarios
+    categorias_populares = Categoria.objects.annotate(
+        total_articulos=Count('articulos', distinct=True),
+        total_comentarios=Count('articulos__comentarios', distinct=True),
+    ).filter(total_articulos__gt=0).order_by('-total_articulos', '-total_comentarios')[:8]
+
     context = {
         'destacados': articulos_destacados,
         'noticias': ultimas_noticias,
-        'orden_actual': orden, # Pasamos esto para que el select recuerde la opción
+        'orden_actual': orden,
+        'categorias': categorias_populares,
     }
     return render(request, 'pages/index.html', context)
 
+
+def listar_por_categoria(request, categoria_id):
+    """Vista para mostrar artículos filtrados por categoría"""
+    categoria = get_object_or_404(Categoria, id=categoria_id)
+    orden = request.GET.get('orden', 'reciente')
+    
+    orden_opciones = {
+        'reciente': '-fecha_creacion',
+        'antigua': 'fecha_creacion',
+        'alpha_asc': 'titulo',
+        'alpha_desc': '-titulo'
+    }
+    campo_orden = orden_opciones.get(orden, '-fecha_creacion')
+    
+    # Filtrar artículos por categoría
+    articulos_destacados = Articulo.objects.filter(
+        categoria=categoria, 
+        destacado=True
+    ).order_by('-fecha_creacion')[:3]
+    
+    noticias = Articulo.objects.filter(categoria=categoria).order_by(campo_orden)
+    
+    # Obtener categorías populares
+    categorias_populares = Categoria.objects.annotate(
+        total_articulos=Count('articulos', distinct=True),
+        total_comentarios=Count('articulos__comentarios', distinct=True),
+    ).filter(total_articulos__gt=0).order_by('-total_articulos', '-total_comentarios')[:8]
+    
+    context = {
+        'destacados': articulos_destacados,
+        'noticias': noticias,
+        'orden_actual': orden,
+        'categorias': categorias_populares,
+        'categoria_seleccionada': categoria,
+    }
+    return render(request, 'pages/index.html', context)
 
 def about(request):
     return render(request, 'pages/about.html')
@@ -292,8 +336,8 @@ def gestion_usuarios(request):
                 # Solo superusuarios pueden asignar rol de administrador
                 elif nuevo_rol == 'administrador' and not es_superusuario:
                     messages.error(request, 'Solo el superusuario puede asignar el rol de administrador')
-                # Administradores solo pueden asignar miembro o colaborador
-                elif nuevo_rol in ['miembro', 'colaborador']:
+                # Validar que el rol sea válido
+                elif nuevo_rol in ['miembro', 'colaborador', 'administrador']:
                     perfil.rol = nuevo_rol
                     perfil.save()
                     messages.success(request, f'Rol de {usuario.username} actualizado a {perfil.get_rol_display()}')

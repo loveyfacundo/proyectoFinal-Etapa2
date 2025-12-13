@@ -1,6 +1,21 @@
 // Archivo JavaScript principal
 console.log("TodoDeporte cargado correctamente");
 
+// Auto-ocultar notificaciones después de 5 segundos
+(function autoHideMessages() {
+  const messages = document.querySelectorAll('.msg');
+  if (messages.length > 0) {
+    messages.forEach(msg => {
+      setTimeout(() => {
+        msg.style.transition = 'opacity 0.5s ease-out, transform 0.5s ease-out';
+        msg.style.opacity = '0';
+        msg.style.transform = 'translateY(-20px)';
+        setTimeout(() => msg.remove(), 500);
+      }, 5000);
+    });
+  }
+})();
+
 // Menú móvil desplegable
 (function mobileMenu() {
   const menuToggle = document.querySelector(".mobile-menu-toggle");
@@ -94,29 +109,40 @@ console.log("TodoDeporte cargado correctamente");
 // Alternador de tema - Modo oscuro/claro
 (function themeToggle() {
   const body = document.body;
-  const toggle = document.querySelector(".theme-toggle");
-  const icon = toggle?.querySelector(".theme-icon use");
+  const toggles = document.querySelectorAll(".theme-toggle");
 
   // Cargar tema guardado
   const savedTheme = localStorage.getItem("theme");
   if (savedTheme === "dark") {
     body.classList.add("dark-mode");
-    icon?.setAttribute(
-      "href",
-      icon.getAttribute("href").replace("#sun", "#moon")
-    );
+    toggles.forEach(toggle => {
+      const icon = toggle.querySelector(".theme-icon use");
+      if (icon) {
+        icon.setAttribute(
+          "href",
+          icon.getAttribute("href").replace("#sun", "#moon")
+        );
+      }
+    });
   }
 
-  // Manejador del alternador
-  toggle?.addEventListener("click", () => {
-    body.classList.toggle("dark-mode");
-    const isDark = body.classList.contains("dark-mode");
-    localStorage.setItem("theme", isDark ? "dark" : "light");
+  // Manejador del alternador para todos los botones
+  toggles.forEach(toggle => {
+    toggle.addEventListener("click", () => {
+      body.classList.toggle("dark-mode");
+      const isDark = body.classList.contains("dark-mode");
+      localStorage.setItem("theme", isDark ? "dark" : "light");
 
-    // Actualizar icono
-    const currentHref = icon?.getAttribute("href") || "";
-    const newIcon = isDark ? "#moon" : "#sun";
-    icon?.setAttribute("href", currentHref.replace(/#(sun|moon)/, newIcon));
+      // Actualizar icono en TODOS los botones de tema
+      toggles.forEach(btn => {
+        const icon = btn.querySelector(".theme-icon use");
+        if (icon) {
+          const currentHref = icon.getAttribute("href") || "";
+          const newIcon = isDark ? "#moon" : "#sun";
+          icon.setAttribute("href", currentHref.replace(/#(sun|moon)/, newIcon));
+        }
+      });
+    });
   });
 })();
 
